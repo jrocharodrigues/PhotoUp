@@ -18,7 +18,7 @@ import com.github.ksoichiro.android.observablescrollview.ObservableGridView;
 import java.util.ArrayList;
 
 /**
- * Created by x00881 on 05-01-2015.
+ * Created by jrocharodrigues on 05-01-2015.
  */
 public class HeaderGridView extends ObservableGridView {
 

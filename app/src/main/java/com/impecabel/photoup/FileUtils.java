@@ -10,7 +10,7 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 
 /**
- * Created by x00881 on 06-01-2015.
+ * Created by jrocharodrigues on 06-01-2015.
  */
 public class FileUtils {
     private FileUtils() {}

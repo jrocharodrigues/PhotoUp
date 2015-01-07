@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/customTitle"
+        android:textColor="@color/secondary_text"
+        android:layout_marginTop="18dp"
+        android:text="@string/username_title" />
+
+    <EditText
+        android:id="@+id/username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/customEntry"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/primary_text"
+        android:inputType="textPersonName" />
+
+    <CheckBox
+        android:id="@+id/backgroundUpload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/customEntry"
+        android:textColor="@color/primary_text"
+        android:text="@string/background_upload_category_title"
+        android:layout_marginTop="18dp" />
+
+</LinearLayout>

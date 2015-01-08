@@ -23,12 +23,21 @@
         android:inputType="textPersonName" />
 
     <CheckBox
-        android:id="@+id/backgroundUpload"
+        android:id="@+id/instantUploading"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="@dimen/customEntry"
         android:textColor="@color/primary_text"
-        android:text="@string/background_upload_category_title"
+        android:text="@string/instant_upload_category_title"
+        android:layout_marginTop="18dp" />
+
+    <CheckBox
+        android:id="@+id/instantUploadingOnWifi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/customEntry"
+        android:textColor="@color/primary_text"
+        android:text="@string/instant_upload_on_wifi"
         android:layout_marginTop="18dp" />
 
 </LinearLayout>

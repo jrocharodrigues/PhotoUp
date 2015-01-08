@@ -8,9 +8,9 @@
     <string name="username_title">Name</string>
     <string name="username_preference_summary">Names to be associated with your photos</string>
     <string name="username_preference_dialog_title">Nome</string>
-    <string name="background_upload_category_title">Automatic Upload</string>
-    <string name="background_upload_title">Automatically upload photos in the background</string>
-    <string name="background_upload_preference_summary">Sends all the new photos automatically in the background</string>
+    <string name="instant_upload_category_title">Automatic Upload</string>
+    <string name="instant_upload_title">Automatically upload photos in the background</string>
+    <string name="instant_upload_preference_summary">Sends all the new photos automatically in the background</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="send_photos">Send Photos</string>
@@ -18,5 +18,6 @@
     <string name="uploading">Uploading</string>
     <string name="upload_success">Upload completed successfully</string>
     <string name="upload_error">Error while uploading</string>
+    <string name="instant_upload_on_wifi">Automatic Upload on Wifi Only</string>
 
 </resources>

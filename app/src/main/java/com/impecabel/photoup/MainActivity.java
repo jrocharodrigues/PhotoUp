@@ -8,6 +8,7 @@ import android.content.res.TypedArray;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -313,7 +314,7 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
         galleryItems.add(new GalleryItem(fileUri, filePath));
         Gson GSON = new Gson();
         SharedPreferences.Editor edit = mSharedPreferences.edit();
-        edit.putString("username",  GSON.toJson(galleryItems));
+        edit.putString("gallery_items",  GSON.toJson(galleryItems));
         edit.commit();
     }
 
@@ -386,7 +387,8 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
 
     EditText usernameInput;
     View positiveAction;
-    CheckBox chkBackgroundUpload;
+    CheckBox chkInstantUploading;
+    CheckBox chkInstantUploadingOnWiFi;
 
     private void showCustomView() {
 
@@ -400,7 +402,8 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
                     public void onPositive(MaterialDialog dialog) {
                         SharedPreferences.Editor edit = mSharedPreferences.edit();
                         edit.putString("username", usernameInput.getText().toString());
-                        edit.putBoolean("background_upload", chkBackgroundUpload.isChecked());
+                        edit.putBoolean("instant_uploading", chkInstantUploading.isChecked());
+                        edit.putBoolean("instant_upload_on_wifi", chkInstantUploadingOnWiFi.isChecked());
                         edit.commit();
                     }
 
@@ -411,7 +414,8 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
 
         positiveAction = dialog.getActionButton(DialogAction.POSITIVE);
         usernameInput = (EditText) dialog.getCustomView().findViewById(R.id.username);
-        chkBackgroundUpload = (CheckBox) dialog.getCustomView().findViewById(R.id.backgroundUpload);
+        chkInstantUploading = (CheckBox) dialog.getCustomView().findViewById(R.id.instantUploading);
+        chkInstantUploadingOnWiFi = (CheckBox) dialog.getCustomView().findViewById(R.id.instantUploadingOnWifi);
         usernameInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -419,25 +423,35 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                positiveAction.setEnabled(s.toString().trim().length() > 0);
+               // positiveAction.setEnabled(s.toString().trim().length() > 0);
             }
 
             @Override
             public void afterTextChanged(Editable s) {
             }
         });
-        boolean backgroundUploadPreference = mSharedPreferences.getBoolean("background_upload", false);
-        chkBackgroundUpload.setChecked(backgroundUploadPreference);
+        boolean instantUploadingPreference = mSharedPreferences.getBoolean("instant_upload_on_wifi", false);
+        chkInstantUploading.setChecked(instantUploadingPreference);
+
+        boolean instantUploadingOnWiFiPreference = mSharedPreferences.getBoolean("instant_uploading", false);
+        chkInstantUploadingOnWiFi.setChecked(instantUploadingOnWiFiPreference);
 
         String usernamePreference = mSharedPreferences.getString("username", "");
 
         usernameInput.setText(usernamePreference);
 
-        positiveAction.setEnabled(usernamePreference.toString().trim().length() > 0);
+
 
 
         // Toggling the show password CheckBox will mask or unmask the password input EditText
-        chkBackgroundUpload.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        chkInstantUploading.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+            }
+        });
+
+        chkInstantUploadingOnWiFi.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
@@ -445,7 +459,7 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
         });
 
         dialog.show();
-        positiveAction.setEnabled(false); // disabled by default
+        //positiveAction.setEnabled(usernamePreference.toString().trim().length() > 0);
     }
 
     //SCROLL HANDLER
@@ -547,9 +561,18 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
         public void onCompleted(String uploadId, int serverResponseCode, String serverResponseMessage) {
             barProgressDialog.dismiss();
 
+            SharedPreferences.Editor edit = mSharedPreferences.edit();
+            edit.remove("gallery_items");
+            edit.commit();
+            galleryItems = new ArrayList<GalleryItem>();
+            customGridAdapter = new GridViewAdapter(getBaseContext(),
+                    R.layout.grid_item, galleryItems);
+            gridView.setAdapter(customGridAdapter);
+
             String message = "Upload with ID " + uploadId + " is completed: " + serverResponseCode + ", "
                     + serverResponseMessage;
             Log.i(TAG, message);
+
         }
     };
 

@@ -8,7 +8,6 @@ import android.content.res.TypedArray;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -73,6 +72,7 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
     private ProgressDialog barProgressDialog;
 
     private static final String GALLERY_ITEMS = "mediaItems";
+    private static final int RESULT_SETTINGS = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,14 +145,23 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
         if (savedInstanceState==null) {
             String galleryItemsGson = mSharedPreferences.getString("gallery_items", null);
 
-            if (galleryItemsGson!= null) {
-                Gson GSON = new Gson();
+            if (galleryItemsGson != null) {
+                try {
+                    Gson GSON = new Gson();
 
-                Type type = new TypeToken<List<GalleryItem>>(){}.getType();
-                galleryItems = GSON.fromJson(galleryItemsGson, type);
-                customGridAdapter = new GridViewAdapter(this,
-                        R.layout.grid_item, galleryItems);
-                gridView.setAdapter(customGridAdapter);
+                    Type type = new TypeToken<List<GalleryItem>>() {
+                    }.getType();
+                    galleryItems = GSON.fromJson(galleryItemsGson, type);
+                    customGridAdapter = new GridViewAdapter(this,
+                            R.layout.grid_item, galleryItems);
+                    gridView.setAdapter(customGridAdapter);
+                }catch (Exception e) {
+                    Log.e(TAG, "Error loading files form preferences - " + e.getMessage() );
+                    SharedPreferences.Editor edit = mSharedPreferences.edit();
+                    edit.remove("gallery_items");
+                    edit.commit();
+
+                }
             }
         }else{
             galleryItems = savedInstanceState.getParcelableArrayList(GALLERY_ITEMS);
@@ -230,6 +239,15 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
         uploadReceiver.unregister(this);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SharedPreferences.Editor edit = mSharedPreferences.edit();
+        edit.remove("gallery_items");
+        edit.commit();
+    }
+
+
     //FILE HANDLERs
 
     private void handleSendImage(Intent intent) {
@@ -305,6 +323,8 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
                     gridView.setAdapter(customGridAdapter);
                 }
 
+            } else if (requestCode == RESULT_SETTINGS){
+                Log.d(TAG, "settings");
             }
         }
 
@@ -335,7 +355,9 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            showCustomView();
+            //showCustomView();
+            Intent i = new Intent(this, SetPreferenceActivity.class);
+            startActivityForResult(i, RESULT_SETTINGS);
             return true;
         } else if (id == R.id.action_upload) {
             onUploadButtonClick();

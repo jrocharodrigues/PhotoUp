@@ -33,6 +33,11 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".SetPreferenceActivity"
+            android:parentActivityName="com.impecabel.photoup.MainActivity"
+            android:label="@string/action_settings">
+        </activity>
 
         <service
             android:name="com.alexbbb.uploadservice.UploadService"

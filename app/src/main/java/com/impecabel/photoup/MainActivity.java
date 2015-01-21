@@ -356,7 +356,7 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             //showCustomView();
-            Intent i = new Intent(this, SetPreferenceActivity.class);
+            Intent i = new Intent(this, SettingsActivity.class);
             startActivityForResult(i, RESULT_SETTINGS);
             return true;
         } else if (id == R.id.action_upload) {

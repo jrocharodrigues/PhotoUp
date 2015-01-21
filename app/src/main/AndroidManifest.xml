@@ -34,8 +34,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SetPreferenceActivity"
-            android:parentActivityName="com.impecabel.photoup.MainActivity"
+            android:name=".SettingsActivity"
+            android:parentActivityName=".MainActivity"
             android:label="@string/action_settings">
         </activity>
 

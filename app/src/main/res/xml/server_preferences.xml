@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"  android:title="@string/prefs_manage_servers" >
+    <Preference
+        android:id="@+id/add_server"
+        android:key="add_server"
+        android:title="@string/prefs_add_server"
+        android:summary="@string/prefs_add_server_summary"/>
+</PreferenceScreen>

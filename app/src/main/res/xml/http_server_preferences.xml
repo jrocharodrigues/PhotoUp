@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/prefs_category_server">
+        <EditTextPreference
+            android:key="set_server_url"
+            android:summary="@string/prefs_url_summary"
+            android:title="@string/prefs_url" />
+        <ListPreference
+            android:key="set_http_method"
+            android:title="@string/prefs_http_method"
+            android:dialogTitle="@string/prefs_http_method"
+            android:entries="@array/pref_httpModes"
+            android:entryValues="@array/pref_httpModes"
+            android:defaultValue="@string/prefs_http_method_post" />
+
+        <EditTextPreference
+            android:key="set_file_parameter"
+            android:summary="@string/prefs_file_parameter_name_summary"
+            android:title="@string/prefs_file_parameter_name" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="headers_category"
+        android:title="@string/prefs_category_headers">
+        <Preference
+            android:id="@+id/manage_headers"
+            android:key="manage_headers"
+            android:summary="@string/prefs_headers_summary"
+            android:title="@string/prefs_manage_headers" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="parameters_category"
+        android:title="@string/prefs_category_parameters">
+        <Preference
+            android:id="@+id/manage_parameters"
+            android:key="manage_headers"
+            android:summary="@string/prefs_parameters_summary"
+            android:title="@string/prefs_manage_parameters" />
+    </PreferenceCategory>
+</PreferenceScreen>

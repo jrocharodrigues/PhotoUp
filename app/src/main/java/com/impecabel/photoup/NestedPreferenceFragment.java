@@ -1,6 +1,5 @@
 package com.impecabel.photoup;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -15,7 +14,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 public class NestedPreferenceFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener {
 
     public static final int NESTED_SCREEN_SERVERS_KEY = 1;
-    public static final int NESTED_SCREEN_2_KEY = 2;
+    public static final int NESTED_SCREEN_ADD_SERVER_KEY = 2;
 
     private static final String TAG_KEY = "NESTED_KEY";
 
@@ -42,14 +41,14 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
         // Load the preferences from an XML resource
         switch (key) {
             case NESTED_SCREEN_SERVERS_KEY:
-                addPreferencesFromResource(R.xml.server_preferences);
+                addPreferencesFromResource(R.xml.server_list_preferences);
                 Preference preference = findPreference(PrefUtils.KEY_ADD_SERVER);
                 preference.setOnPreferenceClickListener(this);
                 break;
 
-              /*  case NESTED_SCREEN_2_KEY:
-                    addPreferencesFromResource(R.xml.nested_screen2_preferences);
-                    break;*/
+               case NESTED_SCREEN_ADD_SERVER_KEY:
+                    addPreferencesFromResource(R.xml.http_server_preferences);
+                    break;
 
             default:
                 break;
@@ -66,7 +65,9 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                     .itemsCallbackSingleChoice(2, new MaterialDialog.ListCallback() {
                         @Override
                         public void onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
-                            Toast.makeText(getActivity(), which + ": " + text, Toast.LENGTH_SHORT).show();
+                           if (which == 1) {
+                               SettingsFragment.mCallback.onNestedPreferenceSelected(NestedPreferenceFragment.NESTED_SCREEN_ADD_SERVER_KEY);
+                           }
                         }
                     })
                     .positiveText(R.string.choose)

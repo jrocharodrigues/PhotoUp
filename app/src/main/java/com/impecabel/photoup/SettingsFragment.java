@@ -11,9 +11,7 @@ import android.view.Window;
  */
 public class SettingsFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener  {
     /*SharedPreferences.OnSharedPreferenceChangeListener */
-    private Callback mCallback;
-
-     //TODO move to prefsUtils
+    public static Callback mCallback;
 
     @Override
     public void onAttach(Activity activity) {

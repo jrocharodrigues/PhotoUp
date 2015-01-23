@@ -42,8 +42,31 @@
 
     <string-array name="addServerModes">
         <item>Read QR Code</item>
-        <item>Use Wizard</item>
         <item>Insert Manually</item>
     </string-array>
+
+    <string name="prefs_category_server">Server</string>
+    <string name="prefs_url">URL</string>
+    <string name="prefs_url_summary">URL of the server side script that will handle the multipart form upload.</string>
+    <string name="prefs_http_method">HTTP method</string>
+    <string name="prefs_http_method_post">POST</string>
+    <string name="prefs_http_method_summary">HTTP method to use</string>
+    <string name="prefs_file_parameter_name">File parameter name</string>
+    <string name="prefs_file_parameter_name_summary">Form parameter that will contain file\'s data</string>
+
+    <string name="prefs_category_headers">Headers</string>
+    <string name="prefs_manage_headers">Manage Headers</string>
+    <string name="prefs_headers_summary">Add, remove or edit Headers to the request</string>
+
+    <string name="prefs_category_parameters">Parameters</string>
+    <string name="prefs_manage_parameters">Manage Parameters</string>
+    <string name="prefs_parameters_summary">Add, remove or edit Parameters to the request</string>
+
+    <string-array name="pref_httpModes">
+        <item>POST</item>
+        <item>GET</item>
+    </string-array>
+
+
 
 </resources>

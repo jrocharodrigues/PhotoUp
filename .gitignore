@@ -13,6 +13,7 @@ gradle
 ehthumbs.db
 Thumbs.db
 
+./app/src/main/java/com/impecabel/photoup/Utils.java 
 
 # User-specific configurations
 .idea/libraries/

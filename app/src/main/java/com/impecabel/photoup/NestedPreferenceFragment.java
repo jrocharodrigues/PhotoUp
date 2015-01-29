@@ -8,6 +8,7 @@ import android.preference.PreferenceScreen;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -60,9 +61,88 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
 
         if (key == NESTED_SCREEN_ADD_SERVER_KEY) {
             setHasOptionsMenu(true);
+            LinearLayout linearLayout = new LinearLayout(getActivity());
+            linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+            linearLayout.setGravity(Gravity.RIGHT);
+
+            Button saveButton = new Button(getActivity(), null, android.R.attr.borderlessButtonStyle);
+            saveButton.setText(R.string.save);
+
+
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+
+            //params.gravity = Gravity.RIGHT;
+            //params.setMargins(100, 0, 0, 500);
+            saveButton.setLayoutParams(params);
+            if (getCurrentServerId() != NEW_SERVER) {
+                Button deleteButton = new Button(getActivity(), null, android.R.attr.borderlessButtonStyle);
+                deleteButton.setText(R.string.delete);
+                deleteButton.setLayoutParams(params);
+                deleteButton.setOnClickListener(new View.OnClickListener() {
+
+                    public void onClick(View v) {
+                        new MaterialDialog.Builder(getActivity())
+                                .content(R.string.confirm_delete)
+                                .positiveText(R.string.delete)
+                                .negativeText(R.string.cancel)
+                                .callback(new MaterialDialog.ButtonCallback() {
+                                    @Override
+                                    public void onPositive(MaterialDialog dialog) {
+                                        int serverID = getCurrentServerId();
+                                        Log.d(TAG, "ServerID: " + serverID);
+                                        uploadServers = PrefUtils.getUploadServers(getActivity());
+
+                                        if (getCurrentServerId() != NEW_SERVER) {
+                                            uploadServers.remove(serverID);
+
+                                        }
+                                        PrefUtils.setUploadServers(getActivity(), uploadServers);
+                                        getFragmentManager().popBackStack();
+                                    }
+                                })
+                                .show();
+
+
+                    }
+                });
+
+                linearLayout.addView(deleteButton);
+            }
+
+            linearLayout.addView(saveButton);
+
+            v.addView(linearLayout);
+            saveButton.setOnClickListener(new View.OnClickListener() {
+
+                public void onClick(View v) {
+
+                    int serverID = getCurrentServerId();
+                    Log.d(TAG, "ServerID: " + serverID);
+                    uploadServers = PrefUtils.getUploadServers(getActivity());
+                    UploadServer uploadServer = new UploadServer(PrefUtils.getServerURL(getActivity()),
+                            PrefUtils.getHTTPMethod(getActivity()),
+                            PrefUtils.getFileParameter(getActivity()),
+                            "HTTP");
+                    if (serverID == NEW_SERVER) {
+                        uploadServers.add(uploadServer);
+
+                    } else {
+                        uploadServers.set(serverID, uploadServer);
+                    }
+                    PrefUtils.setUploadServers(getActivity(), uploadServers);
+                    getFragmentManager().popBackStack();
+
+                }
+            });
+
+
         } else {
             setHasOptionsMenu(false);
         }
+
+
         return v;
     }
 
@@ -193,8 +273,8 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                         actionBar.setTitle(R.string.settings_edit_server);
                     }
 
-                    Preference save_button = findPreference("save_button");
-                    save_button.setOnPreferenceClickListener(this);
+
+
 
                 } else {
                     Toast.makeText(getActivity(), R.string.error_loading_server, Toast.LENGTH_SHORT).show();
@@ -212,6 +292,7 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
     public boolean onPreferenceClick(Preference preference) {
         // here you should use the same keys as you used in the xml-file
         String key = preference.getKey();
+        Log.d(TAG, key);
         if (key.equals(PrefUtils.KEY_ADD_SERVER)) {
             new MaterialDialog.Builder(getActivity())
                     .title(R.string.prefs_add_server)
@@ -227,22 +308,6 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                     .positiveText(R.string.choose)
                     .show();
 
-        } else if (key.equals("save_button")) {
-            int serverID = getCurrentServerId();
-            Log.d(TAG, "ServerID: " + serverID);
-            uploadServers = PrefUtils.getUploadServers(getActivity());
-            UploadServer uploadServer = new UploadServer(PrefUtils.getServerURL(getActivity()),
-                    PrefUtils.getHTTPMethod(getActivity()),
-                    PrefUtils.getFileParameter(getActivity()),
-                    "HTTP");
-            if (serverID == NEW_SERVER) {
-                uploadServers.add(uploadServer);
-
-            } else {
-                uploadServers.set(serverID, uploadServer);
-            }
-            PrefUtils.setUploadServers(getActivity(), uploadServers);
-            getFragmentManager().popBackStack();
         }
 
 

@@ -13,6 +13,7 @@
     <string name="instant_upload_preference_summary">Sends all the new photos automatically in the background</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
     <string name="send_photos">Send Photos</string>
     <string name="title_activity_send_photos">SendPhotos</string>
     <string name="uploading">Uploading</string>
@@ -20,6 +21,7 @@
     <string name="upload_error">Error while uploading</string>
     <string name="instant_upload_on_wifi">Automatic Upload on Wifi Only</string>
     <string name="error_loading_server">Error loafing server!</string>
+    <string name="confirm_delete">Delete server?</string>
 
 <!-- PREFS -->
     <string name="settings_title">Settings</string>
@@ -51,7 +53,8 @@
 
     <string name="prefs_category_server">Server</string>
     <string name="prefs_url">URL</string>
-    <string name="prefs_url_summary">URL of the server side script that will handle the multipart form upload.</string>
+    <!--<string name="prefs_url_summary">URL of the server side script that will handle the multipart form upload.</string>-->
+    <string name="prefs_url_summary">Server side script URL, that will handle the upload.</string>
     <string name="prefs_http_method">HTTP method</string>
     <string name="prefs_http_method_post">POST</string>
     <string name="prefs_http_method_summary">HTTP method to use</string>

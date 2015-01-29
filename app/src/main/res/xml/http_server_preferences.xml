@@ -35,7 +35,12 @@
             android:key="manage_headers"
             android:summary="@string/prefs_parameters_summary"
             android:title="@string/prefs_manage_parameters" />
-    </PreferenceCategory>
 
-    <Preference android:layout="@layout/save_button" android:key="save_button"/>
+
+    </PreferenceCategory>
+   <!-- <Preference
+        android:id="@+id/save_button"
+        android:layout="@layout/save_button"
+        android:key="save_button"
+        android:enabled="true"/>-->
 </PreferenceScreen>

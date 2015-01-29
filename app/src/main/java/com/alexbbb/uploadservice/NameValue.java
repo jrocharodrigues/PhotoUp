@@ -11,7 +11,7 @@ import android.os.Parcelable;
  * @author alexbbb (Alex Gotev)
  *
  */
-class NameValue implements Parcelable {
+public class NameValue implements Parcelable {
 
     private static final String NEW_LINE = "\r\n";
 

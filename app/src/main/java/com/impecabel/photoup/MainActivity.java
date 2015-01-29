@@ -145,12 +145,12 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
         if (savedInstanceState==null) {
             String galleryItemsGson = mSharedPreferences.getString("gallery_items", null);
 
+
             if (galleryItemsGson != null) {
                 try {
                     Gson GSON = new Gson();
 
-                    Type type = new TypeToken<List<GalleryItem>>() {
-                    }.getType();
+                    Type type = new TypeToken<List<GalleryItem>>() {}.getType();
                     galleryItems = GSON.fromJson(galleryItemsGson, type);
                     customGridAdapter = new GridViewAdapter(this,
                             R.layout.grid_item, galleryItems);
@@ -164,7 +164,9 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
                 }
             }
         }else{
-            galleryItems = savedInstanceState.getParcelableArrayList(GALLERY_ITEMS);
+            Gson GSON = new Gson();
+            Type type = new TypeToken<List<GalleryItem>>() {}.getType();
+            galleryItems = GSON.fromJson(savedInstanceState.getString(GALLERY_ITEMS), type);
             customGridAdapter = new GridViewAdapter(this,
                     R.layout.grid_item, galleryItems);
             gridView.setAdapter(customGridAdapter);
@@ -224,7 +226,8 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
     public void onSaveInstanceState(Bundle savedInstanceState) {
         // Always call the superclass so it can save the view hierarchy state
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putParcelableArrayList(GALLERY_ITEMS, galleryItems);
+        Gson GSON = new Gson();
+        savedInstanceState.putString("gallery_items",  GSON.toJson(galleryItems));
     }
 
     @Override
@@ -392,7 +395,9 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
                 getString(R.string.uploading), getString(R.string.upload_success),
                 getString(R.string.upload_error), false);
         barProgressDialog.setProgress(0);
-        barProgressDialog.setMax(galleryItems.size());
+        barProgressDialog.setMax(100);
+        barProgressDialog.setMessage("Uploading file 1/" + galleryItems.size());
+        barProgressDialog.setProgressNumberFormat(null);
         barProgressDialog.show();
 
 
@@ -566,7 +571,8 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
 
         @Override
         public void onProgress(String uploadId, int progress, int currentItem) {
-            barProgressDialog.setProgress(currentItem);
+            barProgressDialog.setProgress(progress);
+            barProgressDialog.setMessage("Uploading file " + currentItem + "/" + galleryItems.size());
 
             Log.i(TAG, "The progress of the upload with ID " + uploadId + " is: " + progress + " currentItem: " + currentItem);
         }

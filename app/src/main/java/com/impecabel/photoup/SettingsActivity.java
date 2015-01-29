@@ -12,6 +12,8 @@ import android.preference.PreferenceFragment;
 import android.support.v4.content.IntentCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.view.Window;
 
@@ -33,22 +35,13 @@ public class SettingsActivity extends ActionBarActivity implements SettingsFragm
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-       /* toolbar.setNavigationIcon(R.drawable.ic_up);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                navigateUpToFromChild(SettingsActivity.this,
-                        IntentCompat.makeMainActivity(new ComponentName(SettingsActivity.this,
-                                MainActivity.class)));
-            }
-        });*/
-
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
                     .add(R.id.container, new SettingsFragment())
                     .commit();
         }
     }
+
 
     @Override
     public void onBackPressed() {
@@ -61,8 +54,8 @@ public class SettingsActivity extends ActionBarActivity implements SettingsFragm
     }
 
     @Override
-    public void onNestedPreferenceSelected(int key) {
-        getFragmentManager().beginTransaction().replace(R.id.container, NestedPreferenceFragment.newInstance(key), TAG).addToBackStack(TAG).commit();
+    public void onNestedPreferenceSelected(int key, int serverId) {
+        getFragmentManager().beginTransaction().replace(R.id.container, NestedPreferenceFragment.newInstance(key, serverId), TAG).addToBackStack(TAG).commit();
     }
 
 }

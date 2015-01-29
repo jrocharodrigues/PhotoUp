@@ -1,16 +1,19 @@
 package com.impecabel.photoup;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Window;
 
 /**
  * Created by x00881 on 21-01-2015.
  */
-public class SettingsFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener  {
-    /*SharedPreferences.OnSharedPreferenceChangeListener */
+public class SettingsFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener, SharedPreferences.OnSharedPreferenceChangeListener  {
+
     public static Callback mCallback;
 
     @Override
@@ -29,15 +32,26 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupSimplePreferencesScreen();
-        // PrefUtils.registerOnSharedPreferenceChangeListener(getActivity(), this);
-
-
+        PrefUtils.registerOnSharedPreferenceChangeListener(getActivity(), this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // PrefUtils.unregisterOnSharedPreferenceChangeListener(getActivity(), this);
+        PrefUtils.unregisterOnSharedPreferenceChangeListener(getActivity(), this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(R.string.settings_title);
+        PrefUtils.registerOnSharedPreferenceChangeListener(getActivity(), this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        PrefUtils.unregisterOnSharedPreferenceChangeListener(getActivity(), this);
     }
 
     private void setupSimplePreferencesScreen() {
@@ -46,36 +60,25 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         // add listeners for non-default actions
         Preference preference = findPreference(PrefUtils.KEY_MANAGE_SERVERS);
         preference.setOnPreferenceClickListener(this);
+        PrefUtils.initSummary(getPreferenceScreen());
     }
 
     @Override
     public boolean onPreferenceClick(Preference preference) {
         // here you should use the same keys as you used in the xml-file
         if (preference.getKey().equals(PrefUtils.KEY_MANAGE_SERVERS)) {
-            mCallback.onNestedPreferenceSelected(NestedPreferenceFragment.NESTED_SCREEN_SERVERS_KEY);
+            mCallback.onNestedPreferenceSelected(NestedPreferenceFragment.NESTED_SCREEN_SERVERS_KEY, -1);
         }
         return false;
     }
 
     public interface Callback {
-        public void onNestedPreferenceSelected(int key);
+        public void onNestedPreferenceSelected(int key, int serverId);
     }
 
 
-    /*@Override
+    @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (PrefUtils.PREF_SYNC_CALENDAR.equals(key)) {
-            Intent intent;
-           if (PrefUtils.shouldSyncCalendar(getActivity())) {
-                // Add all calendar entries
-                intent = new Intent(SessionCalendarService.ACTION_UPDATE_ALL_SESSIONS_CALENDAR);
-            } else {
-                // Remove all calendar entries
-                intent = new Intent(SessionCalendarService.ACTION_CLEAR_ALL_SESSIONS_CALENDAR);
-            }
-
-            intent.setClass(getActivity(), SessionCalendarService.class);
-            getActivity().startService(intent);
-        }
-    }*/
+        PrefUtils.updatePrefSummary(findPreference(key));
+    }
 }

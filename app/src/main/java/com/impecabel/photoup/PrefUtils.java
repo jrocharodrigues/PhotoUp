@@ -18,10 +18,23 @@ package com.impecabel.photoup;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.EditTextPreference;
+import android.preference.ListPreference;
+import android.preference.MultiSelectListPreference;
+import android.preference.Preference;
+import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
+import android.util.Log;
 
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 
 
@@ -29,27 +42,36 @@ import java.util.TimeZone;
  * Utilities and constants related to app preferences.
  */
 public class PrefUtils {
+
     private static final String TAG = "PrefUtils";
+
+    public static ArrayList<UploadServer> uploadServers = new ArrayList<UploadServer>();
 
     public static final String KEY_MANAGE_SERVERS = "manage_servers";
     public static final String KEY_ADD_SERVER = "add_server";
 
-    /**
-     * Boolean preference that when checked, indicates that the user would like to see times
-     * in their local timezone throughout the app.
-     */
-    public static final String PREF_LOCAL_TIMES = "pref_local_times";
 
     /**
-     * Boolean preference that when checked, indicates that the user will be attending the
-     * conference.
+     * JSON  representation of an ArrayList<UploadServer> object that holds the configuration
+     * of the upload servers.
      */
-    public static final String PREF_ATTENDEE_AT_VENUE = "pref_attendee_at_venue";
+    public static final String PREF_UPLOAD_SERVERS = "upload_servers";
 
     /**
-     * Boolean preference that indicates whether we installed the boostrap data or not.
+     * String preference that holds the URL of the server side script that will handle
+     * the multipart form upload.
      */
-    public static final String PREF_DATA_BOOTSTRAP_DONE = "pref_data_bootstrap_done";
+    public static final String PREF_SERVER_URL = "pref_server_url";
+
+    /**
+     * String preference that holds the name of the HTTP method to use
+     */
+    public static final String PREF_HTTP_METHOD = "pref_http_method";
+
+    /**
+     * String preference that holds Form parameter that will contain file's data.
+     */
+    public static final String PREF_FILE_PARAMETER = "pref_file_parameter";
 
     /**
      * Integer preference that indicates what conference year the application is configured
@@ -110,51 +132,62 @@ public class PrefUtils {
     public static final String PREF_SHOW_SESSION_FEEDBACK_REMINDERS
             = "pref_show_session_feedback_reminders";
 
-    public static TimeZone getDisplayTimeZone(Context context) {
-        TimeZone defaultTz = TimeZone.getDefault();
-        return defaultTz;
+    public static ArrayList<UploadServer> getUploadServers (final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        Gson GSON = new Gson();
+        Type type = new TypeToken<List<UploadServer>>() {}.getType();
+        ArrayList<UploadServer> returnArray = GSON.fromJson(sp.getString(PREF_UPLOAD_SERVERS, ""), type);
+        if (returnArray == null)
+            return new ArrayList<UploadServer>();
+        return returnArray;
     }
 
-    public static boolean isUsingLocalTime(Context context) {
+    public static void setUploadServers (final Context context, ArrayList<UploadServer> uploadServers) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_LOCAL_TIMES, false);
+        Gson GSON = new Gson();
+        sp.edit().putString(PREF_UPLOAD_SERVERS, GSON.toJson(uploadServers)).commit();
     }
 
-    public static void setUsingLocalTime(final Context context, final boolean usingLocalTime) {
+    public static void setServerURL(final Context context, String serverURL) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_LOCAL_TIMES, usingLocalTime).commit();
+        sp.edit().putString(PREF_SERVER_URL, serverURL).commit();
     }
 
-    public static boolean isAttendeeAtVenue(final Context context) {
+    public static String getServerURL(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_ATTENDEE_AT_VENUE, true);
+        return sp.getString(PREF_SERVER_URL, "");
     }
 
-    public static void markDataBootstrapDone(final Context context) {
+    public static void setHTTPMethod(final Context context, String HTTPMethod) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_DATA_BOOTSTRAP_DONE, true).commit();
+        sp.edit().putString(PREF_HTTP_METHOD, HTTPMethod).commit();
     }
 
-    public static boolean isDataBootstrapDone(final Context context) {
+    public static String getHTTPMethod(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_DATA_BOOTSTRAP_DONE, false);
+        return sp.getString(PREF_HTTP_METHOD, "");
     }
 
-    public static void init(final Context context) {
-        // Check what year we're configured for
+    public static void setFileParameter(final Context context, String fileParameter) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        int conferenceYear = sp.getInt(PREF_CONFERENCE_YEAR, 0);
-       /* if (conferenceYear != Config.CONFERENCE_YEAR) {
-            LOGD(TAG, "App not yet set up for " + PREF_CONFERENCE_YEAR + ". Resetting data.");
-            // Application is configured for a different conference year. Reset preferences.
-            sp.edit().clear().putInt(PREF_CONFERENCE_YEAR, Config.CONFERENCE_YEAR).commit();
-        }*/
+        sp.edit().putString(PREF_FILE_PARAMETER, fileParameter).commit();
     }
 
-    public static void setAttendeeAtVenue(final Context context, final boolean isAtVenue) {
+    public static String getFileParameter(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_ATTENDEE_AT_VENUE, isAtVenue).commit();
+        return sp.getString(PREF_FILE_PARAMETER, "");
     }
+
+    public static void cleanServerSettings(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().remove(PREF_SERVER_URL).commit();
+        sp.edit().remove(PREF_HTTP_METHOD).commit();
+        sp.edit().remove(PREF_FILE_PARAMETER).commit();
+    }
+
+
+
+
 
     public static void markUserRefusedSignIn(final Context context) {
         markUserRefusedSignIn(context, true);
@@ -260,23 +293,7 @@ public class PrefUtils {
         //sp.edit().putLong(PREF_LAST_SYNC_SUCCEEDED, UIUtils.getCurrentTime(context)).commit();
     }
 
-    /**
-     * Returns whether or not we should offer to take the user to the Google I/O extended
-     * website. If actively==true, will return whether we should offer actively (with a card,
-     * for example); if actively==false, will return whether we should do so passively
-     * (with an overflow item in the menu, for instance).
-     */
-    public static boolean shouldOfferIOExtended(final Context context, boolean actively) {
-        boolean isRemote = !PrefUtils.isAttendeeAtVenue(context);
-        boolean hasNotDismissed = !PrefUtils.hasDismissedIOExtendedCard(context);
-       // boolean conferenceGoingOn = !TimeUtils.hasConferenceEnded(context);
 
-        if (actively) {
-            return isRemote;// && hasNotDismissed && conferenceGoingOn;
-        } else {
-            return isRemote;// && conferenceGoingOn;
-        }
-    }
 
     public static boolean isAnalyticsEnabled(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
@@ -308,7 +325,7 @@ public class PrefUtils {
         return sp.getBoolean(PREF_SYNC_CALENDAR, false);
     }
 
-   /* public static void registerOnSharedPreferenceChangeListener(final Context context,
+    public static void registerOnSharedPreferenceChangeListener(final Context context,
             SharedPreferences.OnSharedPreferenceChangeListener listener) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.registerOnSharedPreferenceChangeListener(listener);
@@ -318,5 +335,76 @@ public class PrefUtils {
                                                                   SharedPreferences.OnSharedPreferenceChangeListener listener) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.unregisterOnSharedPreferenceChangeListener(listener);
-    }*/
+    }
+
+    public static void initSummary(Preference p) {
+        if (p instanceof PreferenceGroup) {
+            PreferenceGroup pGrp = (PreferenceGroup) p;
+            for (int i = 0; i < pGrp.getPreferenceCount(); i++) {
+                initSummary(pGrp.getPreference(i));
+            }
+        } else {
+            updatePrefSummary(p);
+        }
+    }
+
+    public static void updatePrefSummary(Preference p) {
+        if (p == null)
+            return;
+
+        if (p instanceof ListPreference) {
+            ListPreference listPref = (ListPreference) p;
+            if (listPref.getEntry() != null) {
+                p.setSummary(listPref.getEntry());
+            }
+        }
+        else if (p instanceof EditTextPreference) {
+            EditTextPreference editTextPref = (EditTextPreference) p;
+            if (editTextPref.getText() != null) {
+                if (p.getTitle().toString().contains("assword") || p.getTitle().toString().contains("PIN")) {
+                    p.setSummary("******");
+                } else {
+                    p.setSummary(editTextPref.getText());
+                }
+            }
+        }
+        else if (p instanceof MultiSelectListPreference) {
+            // MultiSelectList Preference
+            MultiSelectListPreference mlistPref = (MultiSelectListPreference) p;
+            String summaryMListPref = "";
+            String and = "";
+
+            // Retrieve values
+            Set<String> values = mlistPref.getValues();
+            for (String value : values) {
+                // For each value retrieve index
+                int index = mlistPref.findIndexOfValue(value);
+                // Retrieve entry from index
+                CharSequence mEntry = index >= 0
+                        && mlistPref.getEntries() != null ? mlistPref
+                        .getEntries()[index] : null;
+                if (mEntry != null) {
+                    // add summary
+                    summaryMListPref = summaryMListPref + and + mEntry;
+                    and = ";";
+                }
+            }
+            // set summary
+            if (summaryMListPref != null) {
+                mlistPref.setSummary(summaryMListPref);
+            }
+        }
+    }
+
+    public static void loadServerInfo(Context context, UploadServer uploadServer) {
+
+        if (uploadServer != null) {
+            setServerURL(context, uploadServer.getURL());
+            setFileParameter(context, uploadServer.getFileParameterName());
+            setHTTPMethod(context, uploadServer.getMethod());
+        } else {
+            //it's a new server
+            cleanServerSettings(context);
+        }
+    }
 }

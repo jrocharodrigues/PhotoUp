@@ -28,6 +28,7 @@ import android.preference.PreferenceScreen;
 import android.util.Log;
 
 
+import com.alexbbb.uploadservice.NameValue;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -45,17 +46,27 @@ public class PrefUtils {
 
     private static final String TAG = "PrefUtils";
 
+    public static final int NEW_SERVER = -1;
+
     public static ArrayList<UploadServer> uploadServers = new ArrayList<UploadServer>();
 
+    /**
+     * This are just keys for preferences that act like buttons
+     * No getters or setters
+     */
     public static final String KEY_MANAGE_SERVERS = "manage_servers";
     public static final String KEY_ADD_SERVER = "add_server";
+    public static final String KEY_MANAGE_HEADERS = "manage_headers";
+    public static final String KEY_ADD_HEADER = "add_header";
+    public static final String KEY_MANAGE_PARAMETERS = "manage_parameters";
+    public static final String KEY_ADD_PARAMETER = "add_parameter";
 
 
     /**
      * JSON  representation of an ArrayList<UploadServer> object that holds the configuration
      * of the upload servers.
      */
-    public static final String PREF_UPLOAD_SERVERS = "upload_servers";
+    public static final String PREF_UPLOAD_SERVERS = "pref_upload_servers";
 
     /**
      * String preference that holds the URL of the server side script that will handle
@@ -74,63 +85,18 @@ public class PrefUtils {
     public static final String PREF_FILE_PARAMETER = "pref_file_parameter";
 
     /**
-     * Integer preference that indicates what conference year the application is configured
-     * for. Typically, if this isn't an exact match, preferences should be wiped to re-run
-     * setup.
+     * JSON  representation of an ArrayList<NameValue> object that holds the headers
+     * to be sent on the request.
      */
-    public static final String PREF_CONFERENCE_YEAR = "pref_conference_year";
+    public static final String PREF_HEADERS = "pref_headers";
 
     /**
-     * Boolean indicating whether we should attempt to sign in on startup (default true).
+     * JSON  representation of an ArrayList<NameValue> object that holds the parameters
+     * to be sent on the request.
      */
-    public static final String PREF_USER_REFUSED_SIGN_IN = "pref_user_refused_sign_in";
+    public static final String PREF_PARAMETERS = "pref_parameters";
 
-    /**
-     * Boolean indicating whether the debug build warning was already shown.
-     */
-    public static final String PREF_DEBUG_BUILD_WARNING_SHOWN = "pref_debug_build_warning_shown";
 
-    /** Boolean indicating whether ToS has been accepted */
-    public static final String PREF_TOS_ACCEPTED = "pref_tos_accepted";
-
-    /** Boolean indicating whether ToS has been accepted */
-    public static final String PREF_DECLINED_WIFI_SETUP = "pref_declined_wifi_setup";
-
-    /** Boolean indicating whether user has answered if they are local or remote. */
-    public static final String PREF_ANSWERED_LOCAL_OR_REMOTE = "pref_answered_local_or_remote";
-
-    /** Boolean indicating whether the user dismissed the I/O extended card. */
-    public static final String PREF_DISMISSED_IO_EXTENDED_CARD = "pref_dismissed_io_extended_card";
-
-    /** Boolean indicating whether the user has enabled BLE on the Nearby screen. */
-    public static final String PREF_BLE_ENABLED = "pref_ble_enabled";
-
-    /** Long indicating when a sync was last ATTEMPTED (not necessarily succeeded) */
-    public static final String PREF_LAST_SYNC_ATTEMPTED = "pref_last_sync_attempted";
-
-    /** Long indicating when a sync last SUCCEEDED */
-    public static final String PREF_LAST_SYNC_SUCCEEDED = "pref_last_sync_succeeded";
-
-    /** Sync interval that's currently configured */
-    public static final String PREF_CUR_SYNC_INTERVAL = "pref_cur_sync_interval";
-
-    /** Sync sessions with local calendar*/
-    public static final String PREF_SYNC_CALENDAR  = "pref_sync_calendar";
-
-    /**
-     * Boolean indicating whether we performed the (one-time) welcome flow.
-     */
-    public static final String PREF_WELCOME_DONE = "pref_welcome_done";
-
-    /** Boolean indicating if we can collect and Analytics */
-    public static final String PREF_ANALYTICS_ENABLED = "pref_analytics_enabled";
-
-    /** Boolean indicating whether to show session reminder notifications */
-    public static final String PREF_SHOW_SESSION_REMINDERS = "pref_show_session_reminders";
-
-    /** Boolean indicating whether to show session feedback notifications */
-    public static final String PREF_SHOW_SESSION_FEEDBACK_REMINDERS
-            = "pref_show_session_feedback_reminders";
 
     public static ArrayList<UploadServer> getUploadServers (final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
@@ -146,6 +112,31 @@ public class PrefUtils {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         Gson GSON = new Gson();
         sp.edit().putString(PREF_UPLOAD_SERVERS, GSON.toJson(uploadServers)).commit();
+    }
+
+    public static void changeServerEnabled(final Context context, int serverId, boolean isEnabled) {
+        uploadServers = getUploadServers(context);
+        UploadServer uploadServer = uploadServers.get(serverId);
+        uploadServer.setEnabled(isEnabled);
+        uploadServers.set(serverId, uploadServer);
+        setUploadServers(context, uploadServers);
+    }
+
+    public static void saveServer(final Context context, int serverId){
+        uploadServers = PrefUtils.getUploadServers(context);
+        UploadServer uploadServer = new UploadServer(getServerURL(context),
+                getHTTPMethod(context),
+                getFileParameter(context),
+                "HTTP",
+                getHeaders(context),
+                getParameters(context)
+        );
+        if (serverId == NEW_SERVER) {
+            uploadServers.add(uploadServer);
+        } else {
+            uploadServers.set(serverId, uploadServer);
+        }
+        setUploadServers(context, uploadServers);
     }
 
     public static void setServerURL(final Context context, String serverURL) {
@@ -185,144 +176,88 @@ public class PrefUtils {
         sp.edit().remove(PREF_FILE_PARAMETER).commit();
     }
 
-
-
-
-
-    public static void markUserRefusedSignIn(final Context context) {
-        markUserRefusedSignIn(context, true);
+    public static ArrayList<NameValue> getServerHeaders (final Context context, int serverId) {
+        ArrayList<NameValue> headers = new ArrayList<NameValue>();
+        if (serverId >= 0){
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+            Gson GSON = new Gson();
+            Type type = new TypeToken<List<UploadServer>>() {}.getType();
+            ArrayList<UploadServer> uploadServers = GSON.fromJson(sp.getString(PREF_UPLOAD_SERVERS, ""), type);
+            if (uploadServers != null) {
+                try {
+                    headers = uploadServers.get(serverId).getHeaders();
+                } catch (Exception e){
+                    Log.w(TAG, "Error getting headers!");
+                }
+            }
+        }
+        return headers;
     }
 
-    public static void markUserRefusedSignIn(final Context context, final boolean refused) {
+    public static ArrayList<NameValue> getHeaders (final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_USER_REFUSED_SIGN_IN, refused).commit();
+        Gson GSON = new Gson();
+        Type type = new TypeToken<List<NameValue>>() {}.getType();
+        ArrayList<NameValue> returnArray = GSON.fromJson(sp.getString(PREF_HEADERS, ""), type);
+        if (returnArray == null)
+            return new ArrayList<NameValue>();
+        return returnArray;
     }
 
-    public static boolean hasUserRefusedSignIn(final Context context) {
+    public static void setHeaders (final Context context, ArrayList<NameValue> headers) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_USER_REFUSED_SIGN_IN, false);
+        Gson GSON = new Gson();
+        sp.edit().putString(PREF_HEADERS, GSON.toJson(headers)).commit();
     }
 
-    public static boolean wasDebugWarningShown(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_DEBUG_BUILD_WARNING_SHOWN, false);
+    public static ArrayList<NameValue> getServerParameters (final Context context, int serverId) {
+        ArrayList<NameValue> parameters = new ArrayList<NameValue>();
+        if (serverId >= 0){
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+            Gson GSON = new Gson();
+            Type type = new TypeToken<List<UploadServer>>() {}.getType();
+            ArrayList<UploadServer> uploadServers = GSON.fromJson(sp.getString(PREF_UPLOAD_SERVERS, ""), type);
+            if (uploadServers != null) {
+                try {
+                    parameters = uploadServers.get(serverId).getParameters();
+                } catch (Exception e){
+                    Log.w(TAG, "Error getting parameters!");
+                }
+            }
+        }
+        return parameters;
     }
 
-    public static void markDebugWarningShown(final Context context) {
+    public static ArrayList<NameValue> getParameters (final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_DEBUG_BUILD_WARNING_SHOWN, true).commit();
+        Gson GSON = new Gson();
+        Type type = new TypeToken<List<NameValue>>() {}.getType();
+        ArrayList<NameValue> returnArray = GSON.fromJson(sp.getString(PREF_PARAMETERS, ""), type);
+        if (returnArray == null)
+            return new ArrayList<NameValue>();
+        return returnArray;
     }
 
-    public static boolean isTosAccepted(final Context context) {
+    public static void setParameters (final Context context, ArrayList<NameValue> parameters) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_TOS_ACCEPTED, false);
+        Gson GSON = new Gson();
+        sp.edit().putString(PREF_PARAMETERS, GSON.toJson(parameters)).commit();
     }
 
-    public static void markTosAccepted(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_TOS_ACCEPTED, true).commit();
-    }
+    public static boolean isServerEnabled(final Context context, int serverId) {
 
-    public static boolean hasDeclinedWifiSetup(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_DECLINED_WIFI_SETUP, false);
-    }
+        if (serverId != PrefUtils.NEW_SERVER) {
+            try {
+                uploadServers = PrefUtils.getUploadServers(context);
+                UploadServer uploadServer = uploadServers.get(serverId);
+                return uploadServer.getEnabled();
+            } catch (Exception e) {
+                Log.w(TAG, "Error getting info on server!");
+            }
+        }
 
-    public static void markDeclinedWifiSetup(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_DECLINED_WIFI_SETUP, true).commit();
-    }
+        return true;
 
-    public static boolean hasAnsweredLocalOrRemote(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_ANSWERED_LOCAL_OR_REMOTE, false);
-    }
-
-    public static void markAnsweredLocalOrRemote(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_ANSWERED_LOCAL_OR_REMOTE, true).commit();
-    }
-
-    public static boolean hasDismissedIOExtendedCard(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_DISMISSED_IO_EXTENDED_CARD, false);
-    }
-
-    public static void markDismissedIOExtendedCard(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_DISMISSED_IO_EXTENDED_CARD, true).commit();
-    }
-
-    public static boolean hasEnabledBle(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_BLE_ENABLED, false);
-    }
-
-    public static void setBleStatus(final Context context, boolean status) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_BLE_ENABLED, status).commit();
-    }
-
-    public static boolean isWelcomeDone(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_WELCOME_DONE, false);
-    }
-
-    public static void markWelcomeDone(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_WELCOME_DONE, true).commit();
-    }
-
-    public static long getLastSyncAttemptedTime(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getLong(PREF_LAST_SYNC_ATTEMPTED, 0L);
-    }
-
-    public static void markSyncAttemptedNow(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        //sp.edit().putLong(PREF_LAST_SYNC_ATTEMPTED, UIUtils.getCurrentTime(context)).commit();
-    }
-
-    public static long getLastSyncSucceededTime(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getLong(PREF_LAST_SYNC_SUCCEEDED, 0L);
-    }
-
-    public static void markSyncSucceededNow(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        //sp.edit().putLong(PREF_LAST_SYNC_SUCCEEDED, UIUtils.getCurrentTime(context)).commit();
-    }
-
-
-
-    public static boolean isAnalyticsEnabled(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_ANALYTICS_ENABLED, true);
-    }
-
-    public static boolean shouldShowSessionReminders(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_SHOW_SESSION_REMINDERS, true);
-    }
-
-    public static boolean shouldShowSessionFeedbackReminders(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_SHOW_SESSION_FEEDBACK_REMINDERS, true);
-    }
-
-    public static long getCurSyncInterval(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getLong(PREF_CUR_SYNC_INTERVAL, 0L);
-    }
-
-    public static void setCurSyncInterval(final Context context, long interval) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putLong(PREF_CUR_SYNC_INTERVAL, interval).commit();
-    }
-
-    public static boolean shouldSyncCalendar(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_SYNC_CALENDAR, false);
     }
 
     public static void registerOnSharedPreferenceChangeListener(final Context context,

@@ -14,6 +14,9 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
+    <string name="add">Add</string>
+    <string name="name">Name</string>
+    <string name="value">Value</string>
     <string name="send_photos">Send Photos</string>
     <string name="title_activity_send_photos">SendPhotos</string>
     <string name="uploading">Uploading</string>
@@ -26,6 +29,8 @@
 <!-- PREFS -->
     <string name="settings_title">Settings</string>
     <string name="settings_server_list">Manage Servers</string>
+    <string name="settings_header_list">Manage Headers</string>
+    <string name="settings_parameter_list">Manage Parameters</string>
     <string name="settings_add_server">Add Server</string>
     <string name="settings_edit_server">Edit Server</string>
 
@@ -34,6 +39,10 @@
     <string name="prefs_servers_summary">Add, remove or edit servers configurations</string>
     <string name="prefs_add_server">Add server</string>
     <string name="prefs_add_server_summary">Add server to upload photos</string>
+    <string name="prefs_add_header">Add Header</string>
+    <string name="prefs_add_header_summary">Add Header that will be sent in the request</string>
+    <string name="prefs_add_parameter">Add Parameter</string>
+    <string name="prefs_add_parameter_summary">Add Parameter that will be sent in the request</string>
     <string name="prefs_category_security">Security</string>
     <string name="prefs_pincode">App PIN</string>
     <string name="prefs_pincode_summary">Protect your client</string>
@@ -48,7 +57,7 @@
 
     <string-array name="addServerModes">
         <item>Read QR Code</item>
-        <item>Insert Manually</item>
+        <item >Insert Manually</item>
     </string-array>
 
     <string name="prefs_category_server">Server</string>

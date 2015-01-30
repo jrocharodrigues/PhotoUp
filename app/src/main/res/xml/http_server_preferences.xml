@@ -32,7 +32,7 @@
         android:title="@string/prefs_category_parameters">
         <Preference
             android:id="@+id/manage_parameters"
-            android:key="manage_headers"
+            android:key="manage_parameters"
             android:summary="@string/prefs_parameters_summary"
             android:title="@string/prefs_manage_parameters" />
 

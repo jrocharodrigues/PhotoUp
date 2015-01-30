@@ -14,7 +14,7 @@
         <EditTextPreference
             android:key="set_pincode"
             android:summary="@string/prefs_pincode_summary"
-            android:title="@string/prefs_pincode" />
+            android:title="@string/prefs_pincode"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/prefs_category_instant_uploading">

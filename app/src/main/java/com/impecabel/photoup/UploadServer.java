@@ -16,12 +16,14 @@ public class UploadServer {
     private ArrayList<NameValue> headers;
     private ArrayList<NameValue> parameters;
 
-    public UploadServer(String URL, String method, String fileParameterName, String type) {
+    public UploadServer(String URL, String method, String fileParameterName, String type, ArrayList<NameValue> headers,  ArrayList<NameValue> parameters) {
         this.enabled = true;
         this.URL = URL;
         this.method = method;
         this.fileParameterName = fileParameterName;
         this.type = type;
+        this.headers = headers;
+        this.parameters = parameters;
     }
 
     public Boolean getEnabled() { return enabled; }

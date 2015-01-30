@@ -174,6 +174,8 @@ public class PrefUtils {
         sp.edit().remove(PREF_SERVER_URL).commit();
         sp.edit().remove(PREF_HTTP_METHOD).commit();
         sp.edit().remove(PREF_FILE_PARAMETER).commit();
+        sp.edit().remove(PREF_HEADERS).commit();
+        sp.edit().remove(PREF_PARAMETERS).commit();
     }
 
     public static ArrayList<NameValue> getServerHeaders (final Context context, int serverId) {
@@ -286,7 +288,7 @@ public class PrefUtils {
     public static void updatePrefSummary(Preference p) {
         if (p == null)
             return;
-
+        Log.d(TAG, p.getKey());
         if (p instanceof ListPreference) {
             ListPreference listPref = (ListPreference) p;
             if (listPref.getEntry() != null) {
@@ -337,6 +339,8 @@ public class PrefUtils {
             setServerURL(context, uploadServer.getURL());
             setFileParameter(context, uploadServer.getFileParameterName());
             setHTTPMethod(context, uploadServer.getMethod());
+            setHeaders(context, uploadServer.getHeaders());
+            setParameters(context, uploadServer.getParameters());
         } else {
             //it's a new server
             cleanServerSettings(context);

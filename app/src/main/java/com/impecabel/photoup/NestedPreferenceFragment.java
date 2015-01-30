@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -37,8 +36,10 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
     public static final int NESTED_SCREEN_ADD_SERVER_KEY = 2;
     public static final int NESTED_SCREEN_HEADERS_KEY = 3;
     public static final int NESTED_SCREEN_PARAMETERS_KEY = 4;
+    public static final int NEW = -1;
     public static final String SERVER_KEY_PREFIX = "SERVER_";
     public static final String HEADER_KEY_PREFIX = "HEADER_";
+    public static final String PARAMETER_KEY_PREFIX = "PARAMETER_";
 
 
 
@@ -96,7 +97,7 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
 
                         public void onClick(View v) {
                             new MaterialDialog.Builder(getActivity())
-                                    .content(R.string.confirm_delete)
+                                    .content(R.string.confirm_delete_server)
                                     .positiveText(R.string.delete)
                                     .negativeText(R.string.cancel)
                                     .callback(new MaterialDialog.ButtonCallback() {
@@ -267,16 +268,29 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                     addPreferencesFromResource(R.xml.http_server_preferences);
                     ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
 
+                    int nHeaders = 0;
+                    int nParameters = 0;
+
                     if (selectedServerId == PrefUtils.NEW_SERVER) {
                         actionBar.setTitle(R.string.settings_add_server);
                     } else {
                         actionBar.setTitle(R.string.settings_edit_server);
+                        nHeaders = selectedUploadServer.getHeaders().size();
+                        nParameters = selectedUploadServer.getParameters().size();
                     }
 
                     Preference pHeaders = findPreference(PrefUtils.KEY_MANAGE_HEADERS);
+
+                    if (nHeaders > 0) {
+                        pHeaders.setSummary(nHeaders + " " + ((nHeaders > 1) ? getString(R.string.headers) : getString(R.string.header)));
+                    }
                     pHeaders.setOnPreferenceClickListener(this);
 
                     Preference pParameters = findPreference(PrefUtils.KEY_MANAGE_PARAMETERS);
+
+                    if (nParameters > 0) {
+                        pParameters.setSummary(nParameters + " " + ((nParameters > 1) ? getString(R.string.parameters) : getString(R.string.parameter)));
+                    }
                     pParameters.setOnPreferenceClickListener(this);
 
                 } else {
@@ -308,21 +322,36 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
 
                 if (headers != null){
                     for (int i = 0; i < headers.size(); i++) {
-                        ImageOnRightPlusClickPreference pref_header = new ImageOnRightPlusClickPreference(getActivity());
+                        final int headerId = i;
+                        final NameValue header = headers.get(i);
+                        ImageButtonPlusClickPreference pref_header = new ImageButtonPlusClickPreference(getActivity());
                         pref_header.setKey(HEADER_KEY_PREFIX + i);
-                        pref_header.setTitle(getString(R.string.name) + ": " + headers.get(i).getName());
-                        pref_header.setSummary(getString(R.string.value) + ": " + headers.get(i).getValue());
-                        //pref_header.setIcon(R.drawable.ic_action_new_dark);
+                        pref_header.setTitle(getString(R.string.name) + ": " + header.getName());
+                        pref_header.setSummary(getString(R.string.value) + ": " + header.getValue());
                         pref_header.setWidgetLayoutResource(R.layout.delete_icon);
-                        pref_header.setImageClickListener(new ImageOnRightPlusClickPreference.ImageOnRightPlusClickListener() {
+                        pref_header.setImageButtonClickListener(new ImageButtonPlusClickPreference.ImageButtonPlusClickListener() {
                             @Override
-                            public void onImageClick(View view) {
-                                Toast.makeText(getActivity(), "image", Toast.LENGTH_SHORT).show();
+                            public void onImageButtonClick(View view) {
+                                new MaterialDialog.Builder(getActivity())
+                                        .content(R.string.confirm_delete_header)
+                                        .positiveText(R.string.delete)
+                                        .negativeText(R.string.cancel)
+                                        .callback(new MaterialDialog.ButtonCallback() {
+                                            @Override
+                                            public void onPositive(MaterialDialog dialog) {
+                                                ArrayList<NameValue> headers = PrefUtils.getServerHeaders(getActivity(), getCurrentServerId());
+                                                if (headers != null) {
+                                                    headers.remove(headerId);
+                                                    handleSaveHeaders(headers);
+                                                }
+                                            }
+                                        })
+                                        .show();
                             }
 
                             @Override
                             public void onClick(View view) {
-                                Toast.makeText(getActivity(), "REST", Toast.LENGTH_SHORT).show();
+                                showAddEditHeaderDialog(headerId, header);
                             }
                         });
 
@@ -353,12 +382,39 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                 }
                 if (parameters != null){
                     for (int i = 0; i < parameters.size(); i++) {
-                        Preference pref_parameter = new Preference(getActivity());
-                        pref_parameter.setKey(HEADER_KEY_PREFIX + i);
-                        pref_parameter.setTitle(getString(R.string.name) + ": " + parameters.get(i).getName());
-                        pref_parameter.setSummary(getString(R.string.value) + ": " + parameters.get(i).getValue());
-                        //TODO OnClick handler
-                        //pref_add_header.setOnPreferenceClickListener(this);
+                        final int parameterId = i;
+                        final NameValue parameter = parameters.get(i);
+                        ImageButtonPlusClickPreference pref_parameter = new ImageButtonPlusClickPreference(getActivity());
+                        pref_parameter.setKey(PARAMETER_KEY_PREFIX + i);
+                        pref_parameter.setTitle(getString(R.string.name) + ": " + parameter.getName());
+                        pref_parameter.setSummary(getString(R.string.value) + ": " + parameter.getValue());
+                        pref_parameter.setWidgetLayoutResource(R.layout.delete_icon);
+                        pref_parameter.setImageButtonClickListener(new ImageButtonPlusClickPreference.ImageButtonPlusClickListener() {
+                            @Override
+                            public void onImageButtonClick(View view) {
+                                new MaterialDialog.Builder(getActivity())
+                                        .content(R.string.confirm_delete_parameter)
+                                        .positiveText(R.string.delete)
+                                        .negativeText(R.string.cancel)
+                                        .callback(new MaterialDialog.ButtonCallback() {
+                                            @Override
+                                            public void onPositive(MaterialDialog dialog) {
+                                                ArrayList<NameValue> parameters = PrefUtils.getServerParameters(getActivity(), getCurrentServerId());
+                                                if (parameters != null) {
+                                                    parameters.remove(parameterId);
+                                                    handleSaveParameters(parameters);
+                                                }
+                                            }
+                                        })
+                                        .show();
+                            }
+
+                            @Override
+                            public void onClick(View view) {
+                                showAddEditParameterDialog(parameterId, parameter);
+                            }
+                        });
+
                         pref_screen_parameters.addPreference(pref_parameter);
                     }
                 }
@@ -399,71 +455,12 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                 break;
             case PrefUtils.KEY_ADD_HEADER:
 
-                MaterialDialog dialogAddHeader = new MaterialDialog.Builder(getActivity())
-                        .title(R.string.prefs_add_header)
-                        .customView(R.layout.preference_header_param_dialog_view, true)
-                        .positiveText(R.string.add)
-                        .negativeText(android.R.string.cancel)
-                        .callback(new MaterialDialog.ButtonCallback() {
-                            @Override
-                            public void onPositive(MaterialDialog dialog) {
-
-                                ArrayList<NameValue> headers = PrefUtils.getServerHeaders(getActivity(), getCurrentServerId());
-                                if (headers == null)
-                                    headers = new ArrayList<NameValue>();
-                                headers.add(new NameValue(headerNameInput.getText().toString(), headerValueInput.getText().toString()));
-                                PrefUtils.setHeaders(getActivity(), headers);
-                                PrefUtils.saveServer(getActivity(), getCurrentServerId());
-
-                                //reload the screen to add the new item
-                                setPreferenceScreen(null);
-                                checkPreferenceResource();
-                            }
-
-                            @Override
-                            public void onNegative(MaterialDialog dialog) {
-                            }
-                        }).build();
-
-                headerNameInput = (EditText) dialogAddHeader.getCustomView().findViewById(R.id.name);
-                headerValueInput = (EditText) dialogAddHeader.getCustomView().findViewById(R.id.value);
-
-                dialogAddHeader.show();
-                Log.d(TAG, getCurrentServerId()+"");
+                showAddEditHeaderDialog(NEW, null);
 
                 break;
             case PrefUtils.KEY_ADD_PARAMETER:
 
-                MaterialDialog dialogAddParameter = new MaterialDialog.Builder(getActivity())
-                        .title(R.string.prefs_add_parameter)
-                        .customView(R.layout.preference_header_param_dialog_view, true)
-                        .positiveText(R.string.add)
-                        .negativeText(android.R.string.cancel)
-                        .callback(new MaterialDialog.ButtonCallback() {
-                            @Override
-                            public void onPositive(MaterialDialog dialog) {
-                                ArrayList<NameValue> parameters = PrefUtils.getServerParameters(getActivity(), getCurrentServerId());
-                                if (parameters == null)
-                                    parameters = new ArrayList<NameValue>();
-
-                                parameters.add(new NameValue( parameterNameInput.getText().toString(), parameterValueInput.getText().toString()));
-                                PrefUtils.setParameters(getActivity(), parameters);
-                                PrefUtils.saveServer(getActivity(), getCurrentServerId());
-
-                                //reload the screen to add the new item
-                                setPreferenceScreen(null);
-                                checkPreferenceResource();
-                            }
-
-                            @Override
-                            public void onNegative(MaterialDialog dialog) {
-                            }
-                        }).build();
-
-                parameterNameInput = (EditText) dialogAddParameter.getCustomView().findViewById(R.id.name);
-                parameterValueInput = (EditText) dialogAddParameter.getCustomView().findViewById(R.id.value);
-
-                dialogAddParameter.show();
+                showAddEditParameterDialog(NEW, null);
 
                 break;
             default:
@@ -481,6 +478,101 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
     private int getCurrentServerId() {
         return getArguments().getInt(TAG_SERVER_ID, -1);
     }
+
+    private void showAddEditHeaderDialog(final int headerId, NameValue header){
+        MaterialDialog dialogAddEditHeader = new MaterialDialog.Builder(getActivity())
+                .title((headerId == NEW) ? R.string.prefs_add_header : R.string.prefs_edit_header)
+                .customView(R.layout.preference_header_param_dialog_view, true)
+                .positiveText((headerId == NEW) ? R.string.add : R.string.save)
+                .negativeText(android.R.string.cancel)
+                .callback(new MaterialDialog.ButtonCallback() {
+                    @Override
+                    public void onPositive(MaterialDialog dialog) {
+
+                        ArrayList<NameValue> headers = PrefUtils.getServerHeaders(getActivity(), getCurrentServerId());
+                        if (headers == null)
+                            headers = new ArrayList<NameValue>();
+                        NameValue newHeader = new NameValue(headerNameInput.getText().toString(), headerValueInput.getText().toString());
+                        if (headerId == NEW) {
+                            headers.add(newHeader);
+                        } else {
+                            headers.set(headerId, newHeader);
+                        }
+                        handleSaveHeaders(headers);
+                    }
+
+                }).build();
+
+
+        headerNameInput = (EditText) dialogAddEditHeader.getCustomView().findViewById(R.id.name);
+        headerValueInput = (EditText) dialogAddEditHeader.getCustomView().findViewById(R.id.value);
+
+        if (headerId != NEW && header != null){
+            //edition time
+            headerNameInput.setText(header.getName());
+            headerValueInput.setText(header.getValue());
+        }
+
+        dialogAddEditHeader.show();
+    }
+
+    private void handleSaveHeaders(ArrayList<NameValue> headers){
+        PrefUtils.setHeaders(getActivity(), headers);
+        //TODO handle refresh new headers on new server
+        PrefUtils.saveServer(getActivity(), getCurrentServerId());
+
+        //reload the screen to add the new item
+        setPreferenceScreen(null);
+        checkPreferenceResource();
+    }
+
+    private void handleSaveParameters(ArrayList<NameValue> parameters){
+        PrefUtils.setParameters(getActivity(), parameters);
+        //TODO handle refresh new parameters on new server
+        PrefUtils.saveServer(getActivity(), getCurrentServerId());
+
+        //reload the screen to add the new item
+        setPreferenceScreen(null);
+        checkPreferenceResource();
+    }
+
+    private void showAddEditParameterDialog(final int parameterId, NameValue parameter){
+        MaterialDialog dialogAddEditParameter = new MaterialDialog.Builder(getActivity())
+                .title((parameterId == NEW) ? R.string.prefs_add_parameter : R.string.prefs_edit_parameter)
+                .customView(R.layout.preference_header_param_dialog_view, true)
+                .positiveText((parameterId == NEW) ? R.string.add : R.string.save)
+                .negativeText(android.R.string.cancel)
+                .callback(new MaterialDialog.ButtonCallback() {
+                    @Override
+                    public void onPositive(MaterialDialog dialog) {
+
+                        ArrayList<NameValue> parameters = PrefUtils.getServerParameters(getActivity(), getCurrentServerId());
+                        if (parameters == null)
+                            parameters = new ArrayList<NameValue>();
+                        NameValue newParameter = new NameValue(parameterNameInput.getText().toString(), parameterValueInput.getText().toString());
+                        if (parameterId == NEW) {
+                            parameters.add(newParameter);
+                        } else {
+                            parameters.set(parameterId, newParameter);
+                        }
+                        handleSaveParameters(parameters);
+                    }
+
+                }).build();
+
+
+        parameterNameInput = (EditText) dialogAddEditParameter.getCustomView().findViewById(R.id.name);
+        parameterValueInput = (EditText) dialogAddEditParameter.getCustomView().findViewById(R.id.value);
+
+        if (parameterId != NEW && parameter != null){
+            //edition time
+            parameterNameInput.setText(parameter.getName());
+            parameterValueInput.setText(parameter.getValue());
+        }
+
+        dialogAddEditParameter.show();
+    }
+
 
 
 

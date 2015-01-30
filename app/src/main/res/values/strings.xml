@@ -24,7 +24,15 @@
     <string name="upload_error">Error while uploading</string>
     <string name="instant_upload_on_wifi">Automatic Upload on Wifi Only</string>
     <string name="error_loading_server">Error loafing server!</string>
-    <string name="confirm_delete">Delete server?</string>
+    <string name="confirm_delete_server">Delete server?</string>
+    <string name="confirm_delete_header">Delete header?</string>
+    <string name="confirm_delete_parameter">Delete parameter?</string>
+    <string name="headers">Headers</string>
+    <string name="header">Header</string>
+    <string name="parameters">Parameters</string>
+    <string name="parameter">Parameter</string>
+
+
 
 <!-- PREFS -->
     <string name="settings_title">Settings</string>
@@ -40,8 +48,10 @@
     <string name="prefs_add_server">Add server</string>
     <string name="prefs_add_server_summary">Add server to upload photos</string>
     <string name="prefs_add_header">Add Header</string>
+    <string name="prefs_edit_header">Edit Header</string>
     <string name="prefs_add_header_summary">Add Header that will be sent in the request</string>
     <string name="prefs_add_parameter">Add Parameter</string>
+    <string name="prefs_edit_parameter">Edit Parameter</string>
     <string name="prefs_add_parameter_summary">Add Parameter that will be sent in the request</string>
     <string name="prefs_category_security">Security</string>
     <string name="prefs_pincode">App PIN</string>

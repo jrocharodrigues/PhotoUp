@@ -1,5 +1,6 @@
 package com.impecabel.photoup;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -23,8 +24,14 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.alexbbb.uploadservice.NameValue;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by jrodrigues on 21-01-2015.
@@ -284,8 +291,8 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                         actionBar.setTitle(R.string.settings_add_server);
                     } else {
                         actionBar.setTitle(R.string.settings_edit_server);
-                        nHeaders = selectedUploadServer.getHeaders().size();
-                        nParameters = selectedUploadServer.getParameters().size();
+                        nHeaders = PrefUtils.getHeaders(getActivity()).size();
+                        nParameters = PrefUtils.getParameters(getActivity()).size();
                     }
 
                     Preference pHeaders = findPreference(PrefUtils.KEY_MANAGE_HEADERS);
@@ -452,7 +459,9 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                         .itemsCallbackSingleChoice(1, new MaterialDialog.ListCallback() {
                             @Override
                             public void onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
-                                if (which == 1) {
+                                if (which == 0) {
+                                    readServerFromQR();
+                                }if (which == 1) {
                                     SettingsFragment.mCallback.onNestedPreferenceSelected(NESTED_SCREEN_ADD_SERVER_KEY, PrefUtils.NEW_SERVER);
                                 }
                             }
@@ -486,6 +495,43 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         PrefUtils.updatePrefSummary(findPreference(key));
+
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (scanResult != null) {
+            String serverData = scanResult.getContents();
+            Log.d(TAG, serverData);
+            try {
+                Gson GSON = new Gson();
+                Type type = new TypeToken<UploadServer>() {
+                }.getType();
+                UploadServer qrUploadServer = GSON.fromJson(serverData, type);
+                PrefUtils.loadServerInfo(getActivity(), qrUploadServer);
+                int serverId = PrefUtils.saveServer(getActivity(), PrefUtils.NEW_SERVER);
+                SettingsFragment.mCallback.onNestedPreferenceSelected(NESTED_SCREEN_ADD_SERVER_KEY, serverId);
+
+            } catch (Exception e){
+                Toast.makeText(getActivity(), getString(R.string.error_reading_qr), Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(getActivity(), getString(R.string.error_reading_qr), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void readServerFromQR(){
+
+        IntentIntegrator integrator = IntentIntegrator.forFragment(this);
+        //integrator.setCaptureLayout(R.layout.custom_capture_layout);
+        integrator.setResultDisplayDuration(0);
+        integrator.setPrompt("Scan a QR Code");
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
+
+        integrator.initiateScan();
+
     }
 
     private int getCurrentServerId() {
@@ -586,8 +632,4 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
 
         dialogAddEditParameter.show();
     }
-
-
-
-
 }

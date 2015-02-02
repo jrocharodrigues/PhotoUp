@@ -122,7 +122,8 @@ public class PrefUtils {
         setUploadServers(context, uploadServers);
     }
 
-    public static void saveServer(final Context context, int serverId){
+    public static int saveServer(final Context context, int serverId){
+        int returnId;
         uploadServers = PrefUtils.getUploadServers(context);
         UploadServer uploadServer = new UploadServer(getServerURL(context),
                 getHTTPMethod(context),
@@ -131,12 +132,19 @@ public class PrefUtils {
                 getHeaders(context),
                 getParameters(context)
         );
+        Gson GSON = new Gson();
+        Log.d(TAG,  GSON.toJson(uploadServer));
+
         if (serverId == NEW_SERVER) {
             uploadServers.add(uploadServer);
+            returnId = uploadServers.size() - 1;
         } else {
             uploadServers.set(serverId, uploadServer);
+            returnId = serverId;
         }
         setUploadServers(context, uploadServers);
+
+        return returnId;
     }
 
     public static void setServerURL(final Context context, String serverURL) {

@@ -23,7 +23,8 @@
     <string name="upload_success">Upload completed successfully</string>
     <string name="upload_error">Error while uploading</string>
     <string name="instant_upload_on_wifi">Automatic Upload on Wifi Only</string>
-    <string name="error_loading_server">Error loafing server!</string>
+    <string name="error_loading_server">Error loading server!</string>
+    <string name="error_reading_qr">Error reading QR Code!</string>
     <string name="confirm_delete_server">Delete server?</string>
     <string name="confirm_delete_header">Delete header?</string>
     <string name="confirm_delete_parameter">Delete parameter?</string>

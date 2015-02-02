@@ -47,6 +47,9 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
     private static final String TAG_KEY = "NESTED_KEY";
     private static final String TAG_SERVER_ID = "SERVER_ID";
     private ArrayList<UploadServer> uploadServers = new ArrayList<UploadServer>();
+    private UploadServer selectedUploadServer;
+
+    private boolean editingServer = false;
 
     private EditText headerNameInput;
     private EditText headerValueInput;
@@ -207,6 +210,7 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
         // Load the preferences from an XML resource
         switch (key) {
             case NESTED_SCREEN_SERVERS_KEY:
+                editingServer = false;
                 addPreferencesFromResource(R.xml.server_list_preferences);
                 PreferenceScreen pref_server_list = (PreferenceScreen) findPreference("server_list");
 
@@ -253,18 +257,23 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                 break;
 
             case NESTED_SCREEN_ADD_SERVER_KEY:
-                UploadServer selectedUploadServer = null;
-                if (selectedServerId >= 0) {
-                    try {
-                        uploadServers = PrefUtils.getUploadServers(getActivity());
-                        selectedUploadServer = uploadServers.get(selectedServerId);
-                    } catch (Exception e) {
-                        Log.w(TAG, "Error getting server!");
+                if (editingServer == false) {
+                    selectedUploadServer = null;
+                    if (selectedServerId > NEW) {
+                        try {
+                            uploadServers = PrefUtils.getUploadServers(getActivity());
+                            selectedUploadServer = uploadServers.get(selectedServerId);
+                        } catch (Exception e) {
+                            Log.w(TAG, "Error getting server!");
+                        }
                     }
                 }
-                if (selectedUploadServer != null || selectedServerId == PrefUtils.NEW_SERVER) {
-                    PrefUtils.loadServerInfo(getActivity(), selectedUploadServer);
 
+                if (selectedUploadServer != null || selectedServerId == PrefUtils.NEW_SERVER) {
+                    if (editingServer == false) {
+                        PrefUtils.loadServerInfo(getActivity(), selectedUploadServer);
+                    }
+                    editingServer = true;
                     addPreferencesFromResource(R.xml.http_server_preferences);
                     ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
 
@@ -312,12 +321,14 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                 pref_screen_headers.addPreference(pref_add_header);
 
                 ArrayList<NameValue> headers = null;
-                if (selectedServerId >= 0) {
+                if (selectedServerId > NEW) {
                     try {
                         headers = PrefUtils.getServerHeaders(getActivity(), selectedServerId);
                     } catch (Exception e) {
                         Log.w(TAG, "Error getting server!");
                     }
+                } else {
+                    headers = PrefUtils.getHeaders(getActivity());
                 }
 
                 if (headers != null){
@@ -379,6 +390,8 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                     } catch (Exception e) {
                         Log.w(TAG, "Error getting server!");
                     }
+                } else {
+                    parameters = PrefUtils.getParameters(getActivity());
                 }
                 if (parameters != null){
                     for (int i = 0; i < parameters.size(); i++) {
@@ -518,9 +531,9 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
 
     private void handleSaveHeaders(ArrayList<NameValue> headers){
         PrefUtils.setHeaders(getActivity(), headers);
-        //TODO handle refresh new headers on new server
-        PrefUtils.saveServer(getActivity(), getCurrentServerId());
-
+        if (getCurrentServerId() != NEW) {
+            PrefUtils.saveServer(getActivity(), getCurrentServerId());
+        }
         //reload the screen to add the new item
         setPreferenceScreen(null);
         checkPreferenceResource();
@@ -528,8 +541,9 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
 
     private void handleSaveParameters(ArrayList<NameValue> parameters){
         PrefUtils.setParameters(getActivity(), parameters);
-        //TODO handle refresh new parameters on new server
-        PrefUtils.saveServer(getActivity(), getCurrentServerId());
+        if (getCurrentServerId() != NEW){
+            PrefUtils.saveServer(getActivity(), getCurrentServerId());
+        }
 
         //reload the screen to add the new item
         setPreferenceScreen(null);

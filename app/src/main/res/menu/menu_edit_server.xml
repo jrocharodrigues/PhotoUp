@@ -5,4 +5,6 @@
         android:title=""
         app:actionLayout="@layout/switch_layout"
         app:showAsAction="always" />
+    <item android:id="@+id/action_create_qr" android:title="@string/action_create_qr"
+        android:orderInCategory="100" app:showAsAction="never" />
 </menu>

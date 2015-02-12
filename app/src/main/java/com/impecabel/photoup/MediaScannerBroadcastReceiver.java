@@ -21,7 +21,7 @@ import java.util.UUID;
  */
 public class MediaScannerBroadcastReceiver extends BroadcastReceiver {
 
-    private static final String TAG = "PhotoUpBroadcastReceiver";
+    private static final String TAG = "PhotoUpBroadReceiver";
 
     // Image action
     // Unofficial action, works for most devices but not HTC. See: https://github.com/owncloud/android/issues/6

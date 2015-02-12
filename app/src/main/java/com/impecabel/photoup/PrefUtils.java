@@ -26,6 +26,7 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.util.Log;
+import android.widget.Toast;
 
 
 import com.alexbbb.uploadservice.NameValue;
@@ -143,6 +144,8 @@ public class PrefUtils {
             returnId = serverId;
         }
         setUploadServers(context, uploadServers);
+
+        Toast.makeText(context, R.string.server_saved, Toast.LENGTH_SHORT).show();
 
         return returnId;
     }

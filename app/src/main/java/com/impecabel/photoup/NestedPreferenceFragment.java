@@ -2,6 +2,8 @@ package com.impecabel.photoup;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -13,6 +15,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -38,7 +41,7 @@ import java.util.List;
  */
 public class NestedPreferenceFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
-    public static final String TAG = "NestedPreferenceFragment";
+    public static final String TAG = "NestedPrefFragment";
     public static final int NESTED_SCREEN_SERVERS_KEY = 1;
     public static final int NESTED_SCREEN_ADD_SERVER_KEY = 2;
     public static final int NESTED_SCREEN_HEADERS_KEY = 3;
@@ -99,6 +102,19 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                 //params.gravity = Gravity.RIGHT;
                 //params.setMargins(100, 0, 0, 500);
                 saveButton.setLayoutParams(params);
+
+                saveButton.setOnClickListener(new View.OnClickListener() {
+
+                    public void onClick(View v) {
+
+                        int serverID = getCurrentServerId();
+                        Log.d(TAG, "ServerID: " + serverID);
+                        PrefUtils.saveServer(getActivity(), serverID);
+                        getFragmentManager().popBackStack();
+
+                    }
+                });
+
                 if (getCurrentServerId() != PrefUtils.NEW_SERVER) {
                     Button deleteButton = new Button(getActivity(), null, android.R.attr.borderlessButtonStyle);
                     deleteButton.setText(R.string.delete);
@@ -137,17 +153,7 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                 linearLayout.addView(saveButton);
 
                 v.addView(linearLayout);
-                saveButton.setOnClickListener(new View.OnClickListener() {
 
-                    public void onClick(View v) {
-
-                        int serverID = getCurrentServerId();
-                        Log.d(TAG, "ServerID: " + serverID);
-                        PrefUtils.saveServer(getActivity(), serverID);
-                        getFragmentManager().popBackStack();
-
-                    }
-                });
 
                 break;
             //case NESTED_SCREEN_HEADERS_KEY:
@@ -177,6 +183,45 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
             }
 
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_create_qr) {
+            try {
+                int serverID = getCurrentServerId();
+                Log.d(TAG, "Generate QR ServerID: " + serverID);
+                serverID = PrefUtils.saveServer(getActivity(), serverID);
+                uploadServers = PrefUtils.getUploadServers(getActivity());
+                Bitmap mQRBitmap = QRCodeHelper.createBitmapQR(new Gson().toJson(uploadServers.get(serverID)));
+
+                Intent intent = new Intent(getActivity(), ShowQRActivity.class);
+                intent.putExtra("QRBitmapImage", mQRBitmap);
+                startActivity(intent);
+
+               /* Uri serverQRUri = QRCodeHelper.createQRCode(getActivity(), new Gson().toJson(uploadServers.get(serverID)));
+                if (serverQRUri != null) {
+                    Intent shareIntent = new Intent();
+                    shareIntent.setAction(Intent.ACTION_SEND);
+                    shareIntent.putExtra(Intent.EXTRA_STREAM, serverQRUri);
+                    shareIntent.setType("image/*");
+                    startActivity(Intent.createChooser(shareIntent, "Share QR using"));
+                } else {
+                    throw new Exception("Invalid URI");
+                }*/
+            } catch (Exception e){
+                Log.e(TAG, "Error generating QR");
+                e.printStackTrace();
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

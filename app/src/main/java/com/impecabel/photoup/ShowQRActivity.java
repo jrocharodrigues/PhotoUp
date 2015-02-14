@@ -13,6 +13,8 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+
 /**
  * Created by jrodrigues on 12/02/15.
  */
@@ -20,6 +22,8 @@ public class ShowQRActivity extends ActionBarActivity {
 
     private ImageView qrImageView;
     private ShareActionProvider mShareActionProvider;
+    private Bitmap mQRBitmap;
+    private String mServerName = "Server";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +39,7 @@ public class ShowQRActivity extends ActionBarActivity {
         qrImageView = (ImageView) findViewById(R.id.ivQRCode);
 
         Intent intent = getIntent();
-        Bitmap mQRBitmap = (Bitmap) intent.getParcelableExtra("QRBitmapImage");
+        mQRBitmap = (Bitmap) intent.getParcelableExtra("QRBitmapImage");
         if (mQRBitmap != null) {
             qrImageView.setImageBitmap(mQRBitmap);
         }
@@ -65,6 +69,24 @@ public class ShowQRActivity extends ActionBarActivity {
 
 
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menu_item_save){
+            if (mQRBitmap != null) {
+
+                if (QRCodeHelper.saveFile(mQRBitmap, mServerName)){
+                    Toast.makeText(this, getText(R.string.qr_saved), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, getText(R.string.error_saving_qr), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     // Call to update the share intent

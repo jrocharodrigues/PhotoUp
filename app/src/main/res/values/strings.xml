@@ -67,7 +67,8 @@
     <string name="about_title">About</string>
 
     <string name="server_saved">Server data saved!</string>
-
+    <string name="qr_saved">Server QR Code saved!</string>
+    <string name="error_saving_qr">Error saving server QR Code!</string>
 
     <string name="choose">Choose</string>
 

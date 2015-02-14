@@ -4,19 +4,26 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
-import java.net.URI;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Created by jrodrigues on 12/02/15.
  */
 public class QRCodeHelper {
+
+    private static final String TAG = "QRCodeHelper";
 
     private static final int DEFAULT_WIDTH = 400;
     private static final int DEFAULT_HEIGHT = 400;
@@ -83,4 +90,43 @@ public class QRCodeHelper {
         return null;
 
     }
+
+    public static boolean saveFile (Bitmap bitmap, String file_name){
+
+        boolean success = false;
+
+        if (isExternalStorageWritable()) {
+            File file = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_PICTURES) , file_name + ".png");
+            FileOutputStream out = null;
+
+            try {
+                out = new FileOutputStream(file);
+                success = bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } finally {
+                if (out != null) try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return success;
+
+    }
+
+    /* Checks if external storage is available for read and write */
+    public static boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        Log.d(TAG, "External storage note available");
+        return false;
+    }
+
 }

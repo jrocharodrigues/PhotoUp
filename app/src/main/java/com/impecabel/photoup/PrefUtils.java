@@ -98,6 +98,38 @@ public class PrefUtils {
     public static final String PREF_PARAMETERS = "pref_parameters";
 
 
+    /**
+     * Boolean preference that when checked, indicates that the instant upload of photos
+     * is active
+     */
+    public static final String PREF_INSTANT_UPLOADS = "pref_instant_uploads";
+
+    /**
+     * Boolean preference that when checked, indicates that the instant upload of photos
+     * is only made when user is connected via WiFi
+     */
+    public static final String PREF_INSTANT_UPLOAD_ON_WIFI = "pref_instant_upload_on_wifi";
+
+    public static boolean isInstantUploadsEnabled(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean(PREF_INSTANT_UPLOADS, false);
+    }
+
+    public static void setInstantUploads(final Context context, final boolean instantUploads) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putBoolean(PREF_INSTANT_UPLOADS, instantUploads).commit();
+    }
+
+    public static boolean isInstantUploadOnWifiOnlyEnabled(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean(PREF_INSTANT_UPLOAD_ON_WIFI, false);
+    }
+
+    public static void setInstantUploadOnWifi(final Context context, final boolean instantUploadOnWif) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putBoolean(PREF_INSTANT_UPLOAD_ON_WIFI, instantUploadOnWif).commit();
+    }
+
 
     public static ArrayList<UploadServer> getUploadServers (final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);

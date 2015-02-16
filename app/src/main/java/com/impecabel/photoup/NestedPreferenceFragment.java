@@ -305,7 +305,11 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                     }
                 }
                 ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(R.string.settings_server_list);
-
+                Intent intent = getActivity().getIntent();
+                if (intent.getBooleanExtra("SHOW_SERVER_WIZZARD", false) ){
+                    intent.removeExtra("SHOW_SERVER_WIZZARD");
+                    this.onPreferenceClick(pref_add_server);
+                }
                 break;
 
             case NESTED_SCREEN_ADD_SERVER_KEY:
@@ -549,18 +553,20 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (scanResult != null) {
             String serverData = scanResult.getContents();
-            Log.d(TAG, serverData);
-            try {
-                Gson GSON = new Gson();
-                Type type = new TypeToken<UploadServer>() {
-                }.getType();
-                UploadServer qrUploadServer = GSON.fromJson(serverData, type);
-                PrefUtils.loadServerInfo(getActivity(), qrUploadServer);
-                int serverId = PrefUtils.saveServer(getActivity(), PrefUtils.NEW_SERVER);
-                SettingsFragment.mCallback.onNestedPreferenceSelected(NESTED_SCREEN_ADD_SERVER_KEY, serverId);
+            Log.d(TAG, "QR Server Data: " + serverData);
+            if (serverData != null && serverData != "") {
+                try {
+                    Gson GSON = new Gson();
+                    Type type = new TypeToken<UploadServer>() {
+                    }.getType();
+                    UploadServer qrUploadServer = GSON.fromJson(serverData, type);
+                    PrefUtils.loadServerInfo(getActivity(), qrUploadServer);
+                    int serverId = PrefUtils.saveServer(getActivity(), PrefUtils.NEW_SERVER);
+                    SettingsFragment.mCallback.onNestedPreferenceSelected(NESTED_SCREEN_ADD_SERVER_KEY, serverId);
 
-            } catch (Exception e){
-                Toast.makeText(getActivity(), getString(R.string.error_reading_qr), Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(getActivity(), getString(R.string.error_reading_qr), Toast.LENGTH_SHORT).show();
+                }
             }
         } else {
             Toast.makeText(getActivity(), getString(R.string.error_reading_qr), Toast.LENGTH_SHORT).show();

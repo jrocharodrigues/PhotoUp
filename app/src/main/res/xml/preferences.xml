@@ -19,13 +19,13 @@
 
     <PreferenceCategory android:title="@string/prefs_category_instant_uploading">
         <CheckBoxPreference
-            android:key="instant_uploading"
+            android:key="pref_instant_uploads"
             android:summary="@string/prefs_instant_upload_summary"
             android:title="@string/prefs_instant_upload" />
         <CheckBoxPreference
-            android:dependency="instant_uploading"
+            android:dependency="pref_instant_uploads"
             android:disableDependentsState="true"
-            android:key="instant_upload_on_wifi"
+            android:key="pref_instant_upload_on_wifi"
             android:title="@string/instant_upload_on_wifi" />
     </PreferenceCategory>
 

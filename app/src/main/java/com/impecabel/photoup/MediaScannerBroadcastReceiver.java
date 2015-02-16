@@ -29,7 +29,7 @@ public class MediaScannerBroadcastReceiver extends BroadcastReceiver {
     // Officially supported action since SDK 14: http://developer.android.com/reference/android/hardware/Camera.html#ACTION_NEW_PICTURE
     private static String NEW_PHOTO_ACTION = "android.hardware.action.NEW_PICTURE";
     // Video action
-    // Officially supported action since SDK 14: http://developer.android.com/reference/android/hardware/Camera.html#ACTION_NEW_VIDEO
+    // Officially suppoted action since SDK 14: http://developer.android.com/reference/android/hardware/Camera.html#ACTION_NEW_VIDEO
     private static String NEW_VIDEO_ACTION = "android.hardware.action.NEW_VIDEO";
 
     @Override
@@ -119,11 +119,11 @@ public class MediaScannerBroadcastReceiver extends BroadcastReceiver {
     }
 
     public static boolean instantUploadEnabled(Context context) {
-        return context.getSharedPreferences("wedPrefs", Context.MODE_PRIVATE).getBoolean("instant_uploading", false);
+        return PrefUtils.isInstantUploadsEnabled(context);
     }
 
     public static boolean instantUploadViaWiFiOnly(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("instant_upload_on_wifi", false);
+        return PrefUtils.isInstantUploadOnWifiOnlyEnabled(context);
     }
 
 }

@@ -52,6 +52,8 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
 
     private SharedPreferences mSharedPreferences;
 
+    private ArrayList<UploadServer> uploadServers = new ArrayList<UploadServer>();
+
     private HeaderGridView gridView;
     private GridViewAdapter customGridAdapter;
     private ArrayList<GalleryItem> galleryItems = new ArrayList<GalleryItem>();
@@ -68,6 +70,7 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
     private int mFabMargin;
     private boolean mFabIsShown;
     private int mFlexibleSpaceAndToolbarHeight;
+    private Intent settingsIntent;
 
     private ProgressDialog barProgressDialog;
 
@@ -85,11 +88,6 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
         barProgressDialog.setTitle("Uploading Images ...");
         barProgressDialog.setMessage("Upload in progress ...");
         barProgressDialog.setProgressStyle(barProgressDialog.STYLE_HORIZONTAL);
-
-
-
-
-
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
@@ -220,6 +218,14 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
 
             }
         });
+
+        uploadServers = PrefUtils.getUploadServers(this);
+
+        settingsIntent = new Intent(this, SettingsActivity.class);
+        if (uploadServers.size() == 0){
+            showNoServerFoundDialog();
+        }
+
     }
 
     @Override
@@ -248,6 +254,24 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
         SharedPreferences.Editor edit = mSharedPreferences.edit();
         edit.remove("gallery_items");
         edit.commit();
+    }
+
+
+    private void showNoServerFoundDialog(){
+        new MaterialDialog.Builder(this)
+                .title(R.string.no_server_configured)
+                .content(R.string.add_new_server)
+                .positiveText(R.string.add)
+                .negativeText(R.string.cancel)
+                .callback(new MaterialDialog.ButtonCallback() {
+                    @Override
+                    public void onPositive(MaterialDialog dialog) {
+                        settingsIntent.putExtra("SHOW_SERVER_WIZZARD", true);
+                        startActivityForResult(settingsIntent, RESULT_SETTINGS);
+
+                    }
+                })
+                .show();
     }
 
 
@@ -358,7 +382,6 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            //showCustomView();
             Intent i = new Intent(this, SettingsActivity.class);
             startActivityForResult(i, RESULT_SETTINGS);
             return true;
@@ -408,85 +431,6 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
             Toast.makeText(this, "Malformed upload request. " + exc.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
 
         }
-    }
-
-    //SHOW SETTINGS
-
-    EditText usernameInput;
-    View positiveAction;
-    CheckBox chkInstantUploading;
-    CheckBox chkInstantUploadingOnWiFi;
-
-    private void showCustomView() {
-
-        MaterialDialog dialog = new MaterialDialog.Builder(this)
-                .title(R.string.title_activity_preferences)
-                .customView(R.layout.dialog_settings, true)
-                .positiveText(R.string.save)
-                .negativeText(R.string.cancel)
-                .callback(new MaterialDialog.ButtonCallback() {
-                    @Override
-                    public void onPositive(MaterialDialog dialog) {
-                        SharedPreferences.Editor edit = mSharedPreferences.edit();
-                        edit.putString("username", usernameInput.getText().toString());
-                        edit.putBoolean("instant_uploading", chkInstantUploading.isChecked());
-                        edit.putBoolean("instant_upload_on_wifi", chkInstantUploadingOnWiFi.isChecked());
-                        edit.commit();
-                    }
-
-                    @Override
-                    public void onNegative(MaterialDialog dialog) {
-                    }
-                }).build();
-
-        positiveAction = dialog.getActionButton(DialogAction.POSITIVE);
-        usernameInput = (EditText) dialog.getCustomView().findViewById(R.id.username);
-        chkInstantUploading = (CheckBox) dialog.getCustomView().findViewById(R.id.instantUploading);
-        chkInstantUploadingOnWiFi = (CheckBox) dialog.getCustomView().findViewById(R.id.instantUploadingOnWifi);
-        usernameInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-               // positiveAction.setEnabled(s.toString().trim().length() > 0);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-        boolean instantUploadingPreference = mSharedPreferences.getBoolean("instant_upload_on_wifi", false);
-        chkInstantUploading.setChecked(instantUploadingPreference);
-
-        boolean instantUploadingOnWiFiPreference = mSharedPreferences.getBoolean("instant_uploading", false);
-        chkInstantUploadingOnWiFi.setChecked(instantUploadingOnWiFiPreference);
-
-        String usernamePreference = mSharedPreferences.getString("username", "");
-
-        usernameInput.setText(usernamePreference);
-
-
-
-
-        // Toggling the show password CheckBox will mask or unmask the password input EditText
-        chkInstantUploading.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-            }
-        });
-
-        chkInstantUploadingOnWiFi.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-            }
-        });
-
-        dialog.show();
-        //positiveAction.setEnabled(usernamePreference.toString().trim().length() > 0);
     }
 
     //SCROLL HANDLER

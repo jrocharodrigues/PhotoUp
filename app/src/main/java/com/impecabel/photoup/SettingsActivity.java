@@ -6,6 +6,7 @@ package com.impecabel.photoup;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -39,6 +40,12 @@ public class SettingsActivity extends ActionBarActivity implements SettingsFragm
             getFragmentManager().beginTransaction()
                     .add(R.id.container, new SettingsFragment())
                     .commit();
+        }
+
+        Intent intent = getIntent();
+        if (intent.getBooleanExtra("SHOW_SERVER_WIZZARD", false)){
+            Log.d(TAG, "BIMBAAA");
+            this.onNestedPreferenceSelected(NestedPreferenceFragment.NESTED_SCREEN_SERVERS_KEY, -1);
         }
     }
 

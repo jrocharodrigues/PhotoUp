@@ -34,7 +34,8 @@
     <string name="header">Header</string>
     <string name="parameters">Parameters</string>
     <string name="parameter">Parameter</string>
-
+    <string name="no_server_configured">No servers found.</string>
+    <string name="add_new_server">Add new server?</string>
 
 
 <!-- PREFS -->

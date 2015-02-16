@@ -1,6 +1,7 @@
 package com.impecabel.photoup;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -17,6 +18,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by jrodrigues on 12/02/15.
@@ -28,16 +31,12 @@ public class QRCodeHelper {
     private static final int DEFAULT_WIDTH = 400;
     private static final int DEFAULT_HEIGHT = 400;
 
+    public final static String APP_PATH = "/PhotoUp/";
+
+    public final static String FULL_PATH = Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES) + APP_PATH;
+
     private QRCodeHelper(){}
-
-    public static Uri createQRCode(Context context, String data){
-        return createQRCode(context, data, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-    }
-
-    public static Uri createQRCode(Context context, String data, int width, int height){
-        Bitmap mBitmap = createBitmapQR(data, width, height);
-        return getLocalBitmapUri(context, mBitmap);
-    }
 
     public static Bitmap createBitmapQR(String data, int width, int height) {
 
@@ -75,34 +74,47 @@ public class QRCodeHelper {
         return bmp;
     }
 
-    public static Uri getLocalBitmapUri(Context context, Bitmap bmp){
-
-        try {
-            String path = MediaStore.Images.Media.insertImage(context.getContentResolver(),
-                    bmp, "Server Configuration QR Code", null);
-
-            Uri uri = Uri.parse(path);
-            return uri;
-        } catch (Exception e){
-            e.printStackTrace();
+    public static Boolean deleteFile(String filePath){
+        File fDelete = new File(filePath);
+        boolean success = false;
+        if (fDelete.exists()) {
+            if (fDelete.delete()) {
+                Log.d(TAG, "file Deleted :" + filePath);
+                success = true;
+            } else {
+                Log.d(TAG, "file not Deleted :" + filePath);
+                success = false;
+            }
         }
 
-        return null;
+        return success;
 
     }
 
-    public static boolean saveFile (Bitmap bitmap, String file_name){
+
+    public static String saveFile (Context context, Bitmap bitmap, String fileName){
 
         boolean success = false;
+        String mFilePath = null;
 
         if (isExternalStorageWritable()) {
-            File file = new File(Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_PICTURES) , file_name + ".png");
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+
+
             FileOutputStream out = null;
 
+
             try {
+                File dir = new File(FULL_PATH);
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
+                File file = new File(FULL_PATH , fileName+ "_" + timeStamp +  ".jpg");
+
                 out = new FileOutputStream(file);
-                success = bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+                success = bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                mFilePath = file.getAbsolutePath();
+                Log.d(TAG, mFilePath);
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -114,8 +126,9 @@ public class QRCodeHelper {
                 }
             }
         }
+        Log.d(TAG, Boolean.toString(success));
 
-        return success;
+        return mFilePath;
 
     }
 
@@ -129,4 +142,12 @@ public class QRCodeHelper {
         return false;
     }
 
+
+    public static void galleryAddPic(Context context, String path) {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(path);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        context.sendBroadcast(mediaScanIntent);
+    }
 }

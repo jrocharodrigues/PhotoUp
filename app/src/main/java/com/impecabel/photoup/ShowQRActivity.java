@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.ShareActionProvider;
@@ -15,6 +16,8 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
+
 /**
  * Created by jrodrigues on 12/02/15.
  */
@@ -24,6 +27,8 @@ public class ShowQRActivity extends ActionBarActivity {
     private ShareActionProvider mShareActionProvider;
     private Bitmap mQRBitmap;
     private String mServerName = "Server";
+    private boolean keepImage = false;
+    private String mLocalFilePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +49,13 @@ public class ShowQRActivity extends ActionBarActivity {
             qrImageView.setImageBitmap(mQRBitmap);
         }
 
-        Uri serverQRUri = QRCodeHelper.getLocalBitmapUri(this, mQRBitmap);
-        if (serverQRUri != null) {
+       // Uri serverQRUri = QRCodeHelper.getLocalBitmapUri(this, mQRBitmap);
+        keepImage = false;
+        mLocalFilePath = QRCodeHelper.saveFile(this, mQRBitmap, mServerName);
+        if (mLocalFilePath != null && mLocalFilePath != "") {
             Intent shareIntent = new Intent();
+            Uri serverQRUri = Uri.parse(mLocalFilePath);
+
             shareIntent.setAction(Intent.ACTION_SEND);
             shareIntent.putExtra(Intent.EXTRA_STREAM, serverQRUri);
             shareIntent.setType("image/*");
@@ -54,6 +63,14 @@ public class ShowQRActivity extends ActionBarActivity {
         }
 
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (!keepImage){
+            QRCodeHelper.deleteFile(mLocalFilePath);
+        }
     }
 
     @Override
@@ -76,14 +93,9 @@ public class ShowQRActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         if (id == R.id.menu_item_save){
-            if (mQRBitmap != null) {
-
-                if (QRCodeHelper.saveFile(mQRBitmap, mServerName)){
-                    Toast.makeText(this, getText(R.string.qr_saved), Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, getText(R.string.error_saving_qr), Toast.LENGTH_SHORT).show();
-                }
-            }
+            keepImage = true;
+            QRCodeHelper.galleryAddPic(this, mLocalFilePath);
+            Toast.makeText(this, getText(R.string.qr_saved), Toast.LENGTH_SHORT).show();
         }
 
         return super.onOptionsItemSelected(item);

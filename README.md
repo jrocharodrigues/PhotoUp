@@ -6,7 +6,7 @@ Great for partys, friends gather and all the even types!
 #TODO
 * Obfuscate QR info
 * implement "No server wizard"
-* Efecctivelly use info from sp to make the uploads and instant upload
+* Efecctivelly use info from sp to make the uploads
 * Add upload history tab (sqllite)
 * implement pin ??
 * implement about and share with friends??

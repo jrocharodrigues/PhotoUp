@@ -5,5 +5,7 @@
         android:orderInCategory="50" app:showAsAction="ifRoom" android:icon="@drawable/ic_action_send_now"/>
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_tabs" android:title="TABS"
+        android:orderInCategory="101" app:showAsAction="never" />
 
 </menu>

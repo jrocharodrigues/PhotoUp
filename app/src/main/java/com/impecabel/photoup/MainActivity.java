@@ -388,6 +388,10 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
         } else if (id == R.id.action_upload) {
             onUploadButtonClick();
             return true;
+        } else if (id == R.id.action_tabs){
+            Intent i = new Intent(this, SoonToBeMainActivity.class);
+            startActivity(i);
+            return true;
         }
 
         return super.onOptionsItemSelected(item);

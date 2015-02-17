@@ -392,7 +392,11 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
             Intent i = new Intent(this, SoonToBeMainActivity.class);
             startActivity(i);
             return true;
-        }
+        } else if (id == R.id.action_tabs2){
+        Intent i = new Intent(this, SoonToBeMainActivity2.class);
+        startActivity(i);
+        return true;
+    }
 
         return super.onOptionsItemSelected(item);
     }

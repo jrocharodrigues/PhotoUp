@@ -7,5 +7,7 @@
         android:orderInCategory="100" app:showAsAction="never" />
     <item android:id="@+id/action_tabs" android:title="TABS"
         android:orderInCategory="101" app:showAsAction="never" />
+    <item android:id="@+id/action_tabs2" android:title="TABS2"
+        android:orderInCategory="101" app:showAsAction="never" />
 
 </menu>

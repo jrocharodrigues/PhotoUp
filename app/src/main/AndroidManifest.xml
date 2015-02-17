@@ -45,6 +45,11 @@
             android:parentActivityName=".MainActivity"
             android:label="@string/app_name">
         </activity>
+        <activity
+            android:name=".SoonToBeMainActivity2"
+            android:parentActivityName=".MainActivity"
+            android:label="@string/app_name">
+        </activity>
 
         <activity
             android:name=".ShowQRActivity"

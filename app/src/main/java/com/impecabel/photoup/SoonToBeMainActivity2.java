@@ -1,8 +1,5 @@
 package com.impecabel.photoup;
 
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -10,12 +7,8 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewTreeObserver;
-import android.widget.AbsListView;
-import android.widget.TextView;
 
 import com.github.ksoichiro.android.observablescrollview.CacheFragmentStatePagerAdapter;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
@@ -33,47 +26,27 @@ import com.nineoldandroids.view.ViewPropertyAnimator;
  * SlidingTabLayout and SlidingTabStrip are from google/iosched:
  * https://github.com/google/iosched
  */
-public class SoonToBeMainActivity extends ActionBarActivity implements ObservableScrollViewCallbacks {
+public class SoonToBeMainActivity2 extends ActionBarActivity implements ObservableScrollViewCallbacks {
 
     private View mHeaderView;
-    private View mFlexibleSpaceView;
     private View mToolbarView;
-    private TextView mTitleView;
     private int mBaseTranslationY;
     private ViewPager mPager;
     private NavigationAdapter mPagerAdapter;
-    private static Context mContext;
-
-    private int mActionBarSize;
-    private int mFlexibleSpaceHeight;
-    private int mFlexibleSpaceShowFabOffset;
-    private int mFlexibleSpaceAndToolbarHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContext = this;
-        setContentView(R.layout.activity_soon_to_be_main);
+        setContentView(R.layout.activity_soon_to_be_main_2);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        if (toolbar != null) {
-            setSupportActionBar(toolbar);
-        }
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         mHeaderView = findViewById(R.id.header);
-        //ViewCompat.setElevation(mHeaderView, getResources().getDimension(R.dimen.toolbar_elevation));
-        mFlexibleSpaceView = findViewById(R.id.flexible_space);
-        mTitleView = (TextView) findViewById(R.id.title);
-        mTitleView.setText(getTitle());
-        setTitle(null);
+        ViewCompat.setElevation(mHeaderView, getResources().getDimension(R.dimen.toolbar_elevation));
         mToolbarView = findViewById(R.id.toolbar);
         mPagerAdapter = new NavigationAdapter(getSupportFragmentManager());
         mPager = (ViewPager) findViewById(R.id.pager);
         mPager.setAdapter(mPagerAdapter);
-
-        mActionBarSize = getActionBarSize();
-        mFlexibleSpaceHeight = getResources().getDimensionPixelSize(R.dimen.flexible_space_height);
-        mFlexibleSpaceAndToolbarHeight = mFlexibleSpaceHeight + mActionBarSize;
 
         SlidingTabLayout slidingTabLayout = (SlidingTabLayout) findViewById(R.id.sliding_tabs);
         slidingTabLayout.setCustomTabView(R.layout.tab_indicator, android.R.id.text1);
@@ -83,7 +56,7 @@ public class SoonToBeMainActivity extends ActionBarActivity implements Observabl
 
         // When the page is selected, other fragments' scrollY should be adjusted
         // according to the toolbar status(shown/hidden)
-        slidingTabLayout.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        /*slidingTabLayout.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i2) {
             }
@@ -98,41 +71,7 @@ public class SoonToBeMainActivity extends ActionBarActivity implements Observabl
             }
         });
 
-        propagateToolbarState(toolbarIsShown());
-
-        mActionBarSize = getActionBarSize();
-        mFlexibleSpaceHeight = getResources().getDimensionPixelSize(R.dimen.flexible_space_height);
-        mFlexibleSpaceAndToolbarHeight = mFlexibleSpaceHeight + mActionBarSize;
-        mFlexibleSpaceShowFabOffset = mActionBarSize;
-
-
-        mFlexibleSpaceView.getLayoutParams().height = mFlexibleSpaceAndToolbarHeight;
-
-        // Set padding view for ListView. This is the flexible space.
-        View paddingView = new View(this);
-        AbsListView.LayoutParams lp = new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT,
-                mFlexibleSpaceAndToolbarHeight);
-        paddingView.setLayoutParams(lp);
-
-        // This is required to disable header's list selector effect
-        paddingView.setClickable(true);
-
-        ViewTreeObserver vto = mTitleView.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                    mTitleView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                } else {
-                    mTitleView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                }
-                updateFlexibleSpaceText(0, true, true);
-            }
-        });
-
-
-//        gridView.addHeaderView(paddingView);
-
+        //propagateToolbarState(toolbarIsShown());*/
     }
 
     @Override
@@ -142,9 +81,9 @@ public class SoonToBeMainActivity extends ActionBarActivity implements Observabl
         return true;
     }
 
-   /* @Override
+    @Override
     public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging) {
-        if (dragging) {
+        /*if (dragging) {
             int toolbarHeight = mToolbarView.getHeight();
             float currentHeaderTranslationY = ViewHelper.getTranslationY(mHeaderView);
             if (firstScroll) {
@@ -155,73 +94,9 @@ public class SoonToBeMainActivity extends ActionBarActivity implements Observabl
             float headerTranslationY = ScrollUtils.getFloat(-(scrollY - mBaseTranslationY), -toolbarHeight, 0);
             ViewPropertyAnimator.animate(mHeaderView).cancel();
             ViewHelper.setTranslationY(mHeaderView, headerTranslationY);
-        }
-    }*/
-
-    @Override
-    public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging) {
-        updateFlexibleSpaceText(scrollY, firstScroll, dragging);
+        }*/
+        return;
     }
-    private void updateFlexibleSpaceText(final int scrollY, boolean firstScroll, boolean dragging) {
-        //if (dragging) {
-            ViewHelper.setTranslationY(mFlexibleSpaceView, -scrollY);
-            int adjustedScrollY = scrollY;
-            if (scrollY < 0) {
-                adjustedScrollY = 0;
-            } else if (mFlexibleSpaceHeight < scrollY) {
-                adjustedScrollY = mFlexibleSpaceHeight;
-            }
-            float maxScale = (float) (mFlexibleSpaceHeight - mToolbarView.getHeight()) / mToolbarView.getHeight();
-            float scale = maxScale * ((float) mFlexibleSpaceHeight - adjustedScrollY) / mFlexibleSpaceHeight;
-
-            ViewHelper.setPivotX(mTitleView, 0);
-            ViewHelper.setPivotY(mTitleView, 0);
-            ViewHelper.setScaleX(mTitleView, 1 + scale);
-            ViewHelper.setScaleY(mTitleView, 1 + scale);
-            ViewHelper.setTranslationY(mTitleView, ViewHelper.getTranslationY(mFlexibleSpaceView) + mFlexibleSpaceView.getHeight() - mTitleView.getHeight() * (1 + scale));
-            int maxTitleTranslationY = mToolbarView.getHeight() + mFlexibleSpaceHeight - (int) (mTitleView.getHeight() * (1 + scale));
-            int titleTranslationY = (int) (maxTitleTranslationY * ((float) mFlexibleSpaceHeight - adjustedScrollY) / mFlexibleSpaceHeight);
-            ViewHelper.setTranslationY(mTitleView, titleTranslationY);
-
-           /* int toolbarHeight = mToolbarView.getHeight();
-            float currentHeaderTranslationY = ViewHelper.getTranslationY(mHeaderView);
-            if (firstScroll) {
-                if (-toolbarHeight < currentHeaderTranslationY) {
-                    mBaseTranslationY = scrollY;
-                }
-            }
-            float headerTranslationY = ScrollUtils.getFloat(-(scrollY - mBaseTranslationY), -toolbarHeight, 0);
-            ViewPropertyAnimator.animate(mHeaderView).cancel();
-            ViewHelper.setTranslationY(mHeaderView, headerTranslationY);*/
-
-            int maxFabTranslationY = mFlexibleSpaceAndToolbarHeight;
-            int fabTranslationY = Math.max(mActionBarSize,
-                Math.min(maxFabTranslationY, -scrollY + mFlexibleSpaceAndToolbarHeight));
-        // ViewHelper.setTranslationX(mFab, mToolbarView.getWidth() - mFabMargin - mFab.getWidth());
-
-            ViewHelper.setTranslationX(mHeaderView, 0);
-            ViewHelper.setTranslationY(mHeaderView, fabTranslationY);
-
-
-
-           /* // Translate FAB
-            int maxFabTranslationY = mFlexibleSpaceAndToolbarHeight - mFab.getHeight() / 2;
-            int fabTranslationY = Math.max(mActionBarSize - mFab.getHeight() / 2,
-                    Math.min(maxFabTranslationY, -scrollY + mFlexibleSpaceAndToolbarHeight - mFab.getHeight() / 2));
-            // ViewHelper.setTranslationX(mFab, mToolbarView.getWidth() - mFabMargin - mFab.getWidth());
-
-            ViewHelper.setTranslationX(mFab, mFabMargin);
-            ViewHelper.setTranslationY(mFab, fabTranslationY);
-
-            // Show/hide FAB
-            if (ViewHelper.getTranslationY(mFab) < mFlexibleSpaceShowFabOffset) {
-                hideFab();
-            } else {
-                showFab();
-            }*/
-        //}
-    }
-
 
     @Override
     public void onDownMotionEvent() {
@@ -242,17 +117,7 @@ public class SoonToBeMainActivity extends ActionBarActivity implements Observabl
 
         // ObservableXxxViews have same API
         // but currently they don't have any common interfaces.
-      //  adjustToolbar(scrollState, view);
-    }
-
-    private int getActionBarSize() {
-        TypedValue typedValue = new TypedValue();
-        int[] textSizeAttr = new int[]{R.attr.actionBarSize};
-        int indexOfAttrTextSize = 0;
-        TypedArray a = obtainStyledAttributes(typedValue.data, textSizeAttr);
-        int actionBarSize = a.getDimensionPixelSize(indexOfAttrTextSize, -1);
-        a.recycle();
-        return actionBarSize;
+        //adjustToolbar(scrollState, view);
     }
 
     private void adjustToolbar(ScrollState scrollState, View view) {
@@ -289,8 +154,6 @@ public class SoonToBeMainActivity extends ActionBarActivity implements Observabl
     }
 
     private void propagateToolbarState(boolean isShown) {
-        if (isShown)
-        return;
         int toolbarHeight = mToolbarView.getHeight();
 
         // Set scrollY for the fragments that are not created yet
@@ -336,14 +199,11 @@ public class SoonToBeMainActivity extends ActionBarActivity implements Observabl
     }
 
     private boolean toolbarIsShown() {
-        //return ViewHelper.getTranslationY(mHeaderView) == 0;
-        return true;
+        return ViewHelper.getTranslationY(mHeaderView) == 0;
     }
 
     private boolean toolbarIsHidden() {
-        //return ViewHelper.getTranslationY(mHeaderView) == -mToolbarView.getHeight();
-
-        return false;
+        return ViewHelper.getTranslationY(mHeaderView) == -mToolbarView.getHeight();
     }
 
     private void showToolbar() {
@@ -365,22 +225,13 @@ public class SoonToBeMainActivity extends ActionBarActivity implements Observabl
         propagateToolbarState(false);
     }
 
-    public static Context getContext(){
-        return mContext;
-    }
-
     /**
      * This adapter provides two types of fragments as an example.
      * {@linkplain #createItem(int)} should be modified if you use this example for your app.
      */
     private static class NavigationAdapter extends CacheFragmentStatePagerAdapter {
 
-
-
-        private static final String[] TITLES =
-                getContext().getResources().getStringArray(R.array.tabLabels);
-
-                ///new String[]{"Upload", "History"};
+        private static final String[] TITLES = new String[]{"Upload", "History"};
 
         private int mScrollY;
 
@@ -397,7 +248,8 @@ public class SoonToBeMainActivity extends ActionBarActivity implements Observabl
             // Initialize fragments.
             // Please be sure to pass scroll position to each fragments using setArguments.
             Fragment f;
-            switch (position) {
+            final int pattern = position % 3;
+            switch (pattern) {
                 case 0: {
                     f = new ViewPagerTabScrollViewFragment();
                     if (0 <= mScrollY) {

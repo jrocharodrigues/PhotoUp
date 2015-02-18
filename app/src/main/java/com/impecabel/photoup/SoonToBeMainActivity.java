@@ -1,17 +1,18 @@
 package com.impecabel.photoup;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.AbsListView;
@@ -20,7 +21,6 @@ import android.widget.TextView;
 import com.github.ksoichiro.android.observablescrollview.CacheFragmentStatePagerAdapter;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
 import com.github.ksoichiro.android.observablescrollview.ScrollState;
-import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
 import com.github.ksoichiro.android.observablescrollview.Scrollable;
 import com.google.samples.apps.iosched.ui.widget.SlidingTabLayout;
 import com.nineoldandroids.view.ViewHelper;
@@ -157,6 +157,33 @@ public class SoonToBeMainActivity extends ActionBarActivity implements Observabl
             ViewHelper.setTranslationY(mHeaderView, headerTranslationY);
         }
     }*/
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            Intent i = new Intent(this, SettingsActivity.class);
+            startActivityForResult(i, 1);
+            return true;
+        }/* else if (id == R.id.action_upload) {
+            onUploadButtonClick();
+            return true;
+        }*/ else if (id == R.id.action_tabs) {
+            Intent i = new Intent(this, SoonToBeMainActivity.class);
+            startActivity(i);
+            return true;
+        } else if (id == R.id.action_tabs2) {
+            Intent i = new Intent(this, MainActivity.class);
+            startActivity(i);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging) {

@@ -7,16 +7,19 @@
 
 
 
-    <FrameLayout
+    <com.impecabel.photoup.HeaderGridView
+        android:id="@+id/gridView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="@dimen/tab_height">
-
-        <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </FrameLayout>
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:gravity="center"
+        android:numColumns="@integer/column_count"
+        android:drawSelectorOnTop="true"
+        android:verticalSpacing="3dp"
+        android:horizontalSpacing="3dp"
+        android:stretchMode="columnWidth"
+        android:scrollbars="none" />
 
     <View
         android:id="@+id/flexible_space"
@@ -62,31 +65,16 @@
                 android:background="@android:color/transparent" />
         </LinearLayout>
     </RelativeLayout>
-    <LinearLayout
-        android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:orientation="vertical">
-
-    <com.google.samples.apps.iosched.ui.widget.SlidingTabLayout
-        android:id="@+id/sliding_tabs"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/tab_height"
-        android:background="@color/primary" />
-    </LinearLayout>
 
     <com.melnykov.fab.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:scaleType="center"
-        android:layout_gravity="bottom|right"
-
-        android:layout_margin="16dp"
         android:src="@drawable/ic_action_new"
         app:fab_colorNormal="@color/accent"
         app:fab_colorPressed="@color/accent"
         app:fab_colorRipple="@color/ripple"
-        app:fab_type="normal"/>
+        app:fab_type="mini"/>
+
 </FrameLayout>

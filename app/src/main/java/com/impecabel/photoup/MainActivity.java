@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
@@ -12,8 +13,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.github.ksoichiro.android.observablescrollview.CacheFragmentStatePagerAdapter;
 import com.google.samples.apps.iosched.ui.widget.SlidingTabLayout;
+import com.melnykov.fab.FloatingActionButton;
 
 /**
  * This is an example of ViewPager + SlidingTab + ListView/ScrollView.
@@ -56,7 +57,7 @@ public class MainActivity extends ActionBarActivity  {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -70,42 +71,39 @@ public class MainActivity extends ActionBarActivity  {
         if (id == R.id.action_settings) {
             Intent i = new Intent(this, SettingsActivity.class);
             startActivityForResult(i, 1);
-            return true;
         }/* else if (id == R.id.action_upload) {
             onUploadButtonClick();
             return true;
         }*/ else if (id == R.id.action_tabs) {
             Intent i = new Intent(this, SoonToBeMainActivity.class);
             startActivity(i);
-            return true;
         } else if (id == R.id.action_tabs2) {
             Intent i = new Intent(this, MainActivity2.class);
             startActivity(i);
-            return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * This adapter provides two types of fragments as an example.
-     * {@linkplain #createItem(int)} should be modified if you use this example for your app.
-     */
-    private static class NavigationAdapter extends CacheFragmentStatePagerAdapter {
-
+    public static class NavigationAdapter extends FragmentStatePagerAdapter {
         private static final String[] TITLES = new String[]{"Upload", "History"};
 
         private int mScrollY;
-
-        public NavigationAdapter(FragmentManager fm) {
-            super(fm);
-        }
 
         public void setScrollY(int scrollY) {
             mScrollY = scrollY;
         }
 
+        public NavigationAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
         @Override
-        protected Fragment createItem(int position) {
+        public int getCount() {
+            return TITLES.length;
+        }
+
+        @Override
+        public Fragment getItem(int position) {
             // Initialize fragments.
             // Please be sure to pass scroll position to each fragments using setArguments.
             Fragment f;
@@ -138,13 +136,11 @@ public class MainActivity extends ActionBarActivity  {
         }
 
         @Override
-        public int getCount() {
-            return TITLES.length;
-        }
-
-        @Override
         public CharSequence getPageTitle(int position) {
             return TITLES[position];
         }
     }
+
+
+
 }

@@ -1,15 +1,15 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <include layout="@layout/padding" />
 
     <GridView
         android:id="@+id/gridView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginLeft="3dp"
+        android:layout_marginTop="3dp"
         android:layout_marginRight="3dp"
         android:drawSelectorOnTop="true"
         android:gravity="center"
@@ -17,5 +17,20 @@
         android:numColumns="@integer/column_count"
         android:scrollbars="none"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="3dp" />
-</LinearLayout>
+        android:verticalSpacing="3dp"
+        android:paddingTop="?android:attr/actionBarSize"
+        android:clipToPadding="false"
+        />
+
+    <com.melnykov.fab.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="center"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_action_new"
+        fab:fab_colorNormal="@color/accent"
+        fab:fab_colorPressed="@color/accent"
+        fab:fab_colorRipple="@color/ripple" />
+</FrameLayout>

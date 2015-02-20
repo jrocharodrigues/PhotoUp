@@ -18,8 +18,8 @@ package com.impecabel.photoup;
 
 import android.app.Activity;
 import android.content.ClipData;
+import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,36 +34,53 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import com.github.ksoichiro.android.observablescrollview.ObservableScrollView;
-import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
-import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
-import com.google.gson.Gson;
+import com.alexbbb.uploadservice.ContentType;
+import com.alexbbb.uploadservice.UploadRequest;
+import com.alexbbb.uploadservice.UploadService;
 import com.melnykov.fab.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.UUID;
 
 public class ViewPagerTabGridViewFragment extends Fragment implements View.OnClickListener {
 
-    private static final String TAG = "PhotoUp";
-
+    private static final String TAG = "PhotoUpGrid";
     private static final int SELECT_PICTURE = 1;
 
+    public static final String ARG_INTENT_ACTION = "ARG_INTENT_ACTION";
+
+    private Context mContext;
     private FloatingActionButton mFabAdd;
-    private ArrayList<GalleryItem> mGalleryItems = new ArrayList<GalleryItem>();
-    private int mImageCounter = 0;
+    private ArrayList<GalleryItem> mGalleryItems = new ArrayList<>();
     private GridView mPhotoGridView;
     private GridViewAdapter mCustomGridAdapter;
+
+    private ProgressDialogListener mCallback;
+    public interface ProgressDialogListener {
+        public void showProgressDialog(int nPhotosToUpload);
+        public void dismissProgressDialog();
+    }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
         View view = inflater.inflate(R.layout.fragment_gridview, container, false);
+        mContext = getActivity();
 
         mFabAdd = (FloatingActionButton) view.findViewById(R.id.fab);
         mFabAdd.setOnClickListener(this);
 
         mPhotoGridView = (GridView) view.findViewById(R.id.gridView);
+        mCustomGridAdapter = new GridViewAdapter(mContext,
+                R.layout.grid_item, mGalleryItems);
+        mPhotoGridView.setAdapter(mCustomGridAdapter);
+
+        Bundle args = getArguments();
+        if (args != null) {
+            handleReceivedPhotos(args);
+        }
 
         return view;
     }
@@ -99,43 +116,28 @@ public class ViewPagerTabGridViewFragment extends Fragment implements View.OnCli
                         // construct array
 
                         for (int i = 0; i < clipdata.getItemCount(); i++) {
-                            mImageCounter++;
                             ClipData.Item item = clipdata.getItemAt(i);
                             Uri imageUri = item.getUri();
 
                             //In case you need image's absolute path
-                            String imagePath = FileUtils.getPath(getActivity(), imageUri);
-                            Toast.makeText(getActivity(), imagePath, Toast.LENGTH_SHORT).show();
+                            String imagePath = FileUtils.getPath(mContext, imageUri);
+                            Toast.makeText(mContext, imagePath, Toast.LENGTH_SHORT).show();
                             addGalleryItem(imageUri, imagePath);
                         }
-                        mCustomGridAdapter = new GridViewAdapter(getActivity(),
-                                R.layout.grid_item, mGalleryItems);
-                        mPhotoGridView.setAdapter(mCustomGridAdapter);
 
                     }
                 } else {
                     Uri imageUri = data.getData();
-                    mImageCounter++;
-
                     //In case you need image's absolute path
-                    String imagePath = FileUtils.getPath(getActivity(), imageUri);
-                    Toast.makeText(getActivity(), imagePath, Toast.LENGTH_SHORT).show();
+                    String imagePath = FileUtils.getPath(mContext, imageUri);
+                    Toast.makeText(mContext, imagePath, Toast.LENGTH_SHORT).show();
                     addGalleryItem(imageUri, imagePath);
-                    mCustomGridAdapter = new GridViewAdapter(getActivity(),
-                            R.layout.grid_item, mGalleryItems);
-                    mPhotoGridView.setAdapter(mCustomGridAdapter);
+
                 }
+                mCustomGridAdapter.notifyDataSetChanged();
             }
         }
 
-    }
-
-    private void addGalleryItem(Uri fileUri, String filePath) {
-        mGalleryItems.add(new GalleryItem(fileUri, filePath));
-        /*Gson GSON = new Gson();
-        SharedPreferences.Editor edit = mSharedPreferences.edit();
-        edit.putString("gallery_items",  GSON.toJson(galleryItems));
-        edit.commit();*/
     }
 
     @Override
@@ -146,16 +148,112 @@ public class ViewPagerTabGridViewFragment extends Fragment implements View.OnCli
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         if (id == R.id.action_upload) {
-            Toast.makeText(getActivity(), "UPLOAD", Toast.LENGTH_SHORT).show();
+            onUploadButtonClick();
         }
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback = (ProgressDialogListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnHeadlineSelectedListener");
+        }
+    }
+
+    private boolean hasFilesToUpload(){
+        return mGalleryItems.size() > 0;
+    }
+
+    private void onUploadButtonClick() {
+        final String serverUrlString = Utils.serverURL;
+        final String paramNameString = Utils.parameterName;
+
+        if (!hasFilesToUpload())
+            return;
+
+        final UploadRequest request = new UploadRequest(mContext, UUID.randomUUID().toString(), serverUrlString);
+
+        for (GalleryItem itemToUpload : mGalleryItems) {
+            request.addFileToUpload(itemToUpload.getPath(), paramNameString,
+                    itemToUpload.getFileName(false), ContentType.APPLICATION_OCTET_STREAM);
+        }
+
+        request.setNotificationConfig(R.drawable.ic_launcher, getString(R.string.app_name),
+                getString(R.string.uploading), getString(R.string.upload_success),
+                getString(R.string.upload_error), false);
+
+        mCallback.showProgressDialog(mGalleryItems.size());
+
+        try {
+            UploadService.startUpload(request);
+        } catch (Exception exc) {
+            mCallback.dismissProgressDialog();
+            Toast.makeText(mContext, "Malformed upload request. " + exc.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+
+        }
+    }
+
+    //SCROLL HANDLER
+
+
+    private void addGalleryItem(Uri fileUri, String filePath) {
+        mGalleryItems.add(new GalleryItem(fileUri, filePath));
+        /*Gson GSON = new Gson();
+        SharedPreferences.Editor edit = mSharedPreferences.edit();
+        edit.putString("gallery_items",  GSON.toJson(galleryItems));
+        edit.commit();*/
+    }
+
+    private void handleReceivedPhotos(Bundle args){
+        //TODO check why the intent doesn't fire if app already opened
+        String intentAction = args.getString(ARG_INTENT_ACTION);
+        Log.d(TAG, "Intent Action:" + intentAction);
+
+
+        if (Intent.ACTION_SEND.equals(intentAction)){
+              Uri imageUri = args.getParcelable(Intent.EXTRA_STREAM);
+
+              if (imageUri != null) {
+                  String imagePath = FileUtils.getPath(mContext, imageUri);
+                  Toast.makeText(mContext, imagePath, Toast.LENGTH_SHORT).show();
+
+                  addGalleryItem(imageUri, imagePath);
+              }
+
+        } else if (Intent.ACTION_SEND_MULTIPLE.equals(intentAction))  {
+            ArrayList<Uri> imageUris = args
+                    .getParcelableArrayList(Intent.EXTRA_STREAM);
+
+            for (Uri imageUri : imageUris){
+                String imagePath = FileUtils.getPath(mContext, imageUri);
+                Toast.makeText(mContext, imagePath, Toast.LENGTH_SHORT).show();
+                addGalleryItem(imageUri, imagePath);
+            }
+
+        }
+        mCustomGridAdapter.notifyDataSetChanged();
+    }
+
+    public void clearImageGrid(){
+        Log.d(TAG, "clear: " + mGalleryItems.size());
+        mGalleryItems.clear();
+        mCustomGridAdapter.notifyDataSetChanged();
+    }
+
+    public void removeItem(int id){
+        Log.d(TAG, "remove: " + id);
+        mGalleryItems.remove(id);
+        mCustomGridAdapter.notifyDataSetChanged();
+    }
 
 }

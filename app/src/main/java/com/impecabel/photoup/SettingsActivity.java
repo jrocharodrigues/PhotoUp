@@ -43,7 +43,7 @@ public class SettingsActivity extends ActionBarActivity implements SettingsFragm
         }
 
         Intent intent = getIntent();
-        if (intent.getBooleanExtra("SHOW_SERVER_WIZZARD", false)){
+        if (intent.getBooleanExtra("SHOW_SERVER_WIZARD", false)){
             Log.d(TAG, "BIMBAAA");
             this.onNestedPreferenceSelected(NestedPreferenceFragment.NESTED_SCREEN_SERVERS_KEY, -1);
         }

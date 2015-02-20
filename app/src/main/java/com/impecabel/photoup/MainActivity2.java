@@ -260,7 +260,7 @@ public class MainActivity2 extends ActionBarActivity implements ObservableScroll
                 .callback(new MaterialDialog.ButtonCallback() {
                     @Override
                     public void onPositive(MaterialDialog dialog) {
-                        settingsIntent.putExtra("SHOW_SERVER_WIZZARD", true);
+                        settingsIntent.putExtra("SHOW_SERVER_WIZARD", true);
                         startActivityForResult(settingsIntent, RESULT_SETTINGS);
 
                     }

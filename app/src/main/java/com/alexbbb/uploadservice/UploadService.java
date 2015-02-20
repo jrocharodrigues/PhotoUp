@@ -19,6 +19,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.TaskStackBuilder;
 
+import com.impecabel.photoup.MainActivity;
 import com.impecabel.photoup.MainActivity2;
 
 /**
@@ -119,9 +120,9 @@ public class UploadService extends IntentService {
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(MainActivity2.class);
+        stackBuilder.addParentStack(MainActivity.class);
 
-        Intent intent= new Intent(this, MainActivity2.class);
+        Intent intent= new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         stackBuilder.addNextIntent(intent);
         PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, intent, 0);

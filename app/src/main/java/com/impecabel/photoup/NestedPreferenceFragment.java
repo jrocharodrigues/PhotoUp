@@ -306,8 +306,8 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                 }
                 ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(R.string.settings_server_list);
                 Intent intent = getActivity().getIntent();
-                if (intent.getBooleanExtra("SHOW_SERVER_WIZZARD", false) ){
-                    intent.removeExtra("SHOW_SERVER_WIZZARD");
+                if (intent.getBooleanExtra("SHOW_SERVER_WIZARD", false) ){
+                    intent.removeExtra("SHOW_SERVER_WIZARD");
                     this.onPreferenceClick(pref_add_server);
                 }
                 break;

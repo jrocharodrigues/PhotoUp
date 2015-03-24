@@ -4,6 +4,7 @@ Android app to serve as a photo uploader to your own host!
 Great for parties, friends gather and all the even types!
 
 #TODO
+* Fix QR Code Sharing
 * Make the notification icon perceptible
 * refine the handling of the upload progress
 * Obfuscate QR info

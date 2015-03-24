@@ -9,8 +9,8 @@ android {
         applicationId "com.impecabel.photup"
         minSdkVersion 15
         targetSdkVersion 21
-        versionCode 3
-        versionName '0.7 alpha-internal-consumption-only'
+        versionCode 4
+        versionName '0.75 alpha-internal-consumption-only'
     }
     buildTypes {
         release {

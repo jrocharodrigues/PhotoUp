@@ -52,7 +52,7 @@ public class ViewPagerTabGridViewFragment extends Fragment implements View.OnCli
 
     private Context mContext;
     private FloatingActionButton mFabAdd;
-    private ArrayList<GalleryItem> mGalleryItems = new ArrayList<>();
+    private ArrayList<GalleryItem> mGalleryItems = new ArrayList<GalleryItem>();
     private GridView mPhotoGridView;
     private GridViewAdapter mCustomGridAdapter;
 
@@ -60,6 +60,7 @@ public class ViewPagerTabGridViewFragment extends Fragment implements View.OnCli
     public interface ProgressDialogListener {
         public void showProgressDialog(int nPhotosToUpload);
         public void dismissProgressDialog();
+        public void showNoServerFoundDialog(final Context context);
     }
 
 
@@ -175,31 +176,43 @@ public class ViewPagerTabGridViewFragment extends Fragment implements View.OnCli
     }
 
     private void onUploadButtonClick() {
-        final String serverUrlString = Utils.serverURL;
-        final String paramNameString = Utils.parameterName;
+        //final String serverUrlString = Utils.serverURL;
+        //final String paramNameString = Utils.parameterName;
 
-        if (!hasFilesToUpload())
-            return;
+        if (!hasFilesToUpload()) return;
 
-        final UploadRequest request = new UploadRequest(mContext, UUID.randomUUID().toString(), serverUrlString);
+        ArrayList<UploadServer> mUploadServers = PrefUtils.getUploadServers(mContext);
 
-        for (GalleryItem itemToUpload : mGalleryItems) {
-            request.addFileToUpload(itemToUpload.getPath(), paramNameString,
-                    itemToUpload.getFileName(false), ContentType.APPLICATION_OCTET_STREAM);
-        }
+        if (mUploadServers.size() > 0) {
 
-        request.setNotificationConfig(R.drawable.ic_launcher, getString(R.string.app_name),
-                getString(R.string.uploading), getString(R.string.upload_success),
-                getString(R.string.upload_error), false);
+            for(UploadServer uploadServer : mUploadServers) {
+                if (uploadServer.isEnabled()) {//maybe implement getEnabledServers
+                    UploadRequest request = new UploadRequest(mContext, UUID.randomUUID().toString(), uploadServer.getURL());
+                    request.setMethod(uploadServer.getMethod());
 
-        mCallback.showProgressDialog(mGalleryItems.size());
+                    for (GalleryItem itemToUpload : mGalleryItems) {
+                        request.addFileToUpload(itemToUpload.getPath(), uploadServer.getFileParameterName(),
+                                itemToUpload.getFileName(false), ContentType.APPLICATION_OCTET_STREAM);
+                    }
 
-        try {
-            UploadService.startUpload(request);
-        } catch (Exception exc) {
-            mCallback.dismissProgressDialog();
-            Toast.makeText(mContext, "Malformed upload request. " + exc.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                    request.setNotificationConfig(R.drawable.ic_launcher, getString(R.string.app_name),
+                            getString(R.string.uploading) + " to " + uploadServer.getURL(), getString(R.string.upload_success),
+                            getString(R.string.upload_error), false);
 
+                    mCallback.showProgressDialog(mGalleryItems.size());
+
+                    try {
+                        UploadService.startUpload(request);
+                        Log.d(TAG, uploadServer.getURL() + "-" + uploadServer.getFileParameterName());
+                    } catch (Exception exc) {
+                        mCallback.dismissProgressDialog();
+                        Toast.makeText(mContext, "Malformed upload request. " + exc.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+            }
+        } else {
+            mCallback.showNoServerFoundDialog(mContext);
         }
     }
 

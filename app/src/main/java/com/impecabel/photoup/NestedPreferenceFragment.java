@@ -285,7 +285,7 @@ public class NestedPreferenceFragment extends PreferenceFragment implements Pref
                         sp.setKey(SERVER_KEY_PREFIX + serverId);
                         sp.setTitle(tmpUploadServer.getURL());
                         sp.setSummary(tmpUploadServer.getType() + " " + tmpUploadServer.getMethod());
-                        sp.setChecked(tmpUploadServer.getEnabled());
+                        sp.setChecked(tmpUploadServer.isEnabled());
                         sp.setSwitchClickListener(new SwitchPlusClickPreference.SwitchPlusClickListener() {
                             @Override
                             public void onCheckedChanged(Switch buttonView, boolean isChecked) {

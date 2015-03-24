@@ -295,7 +295,7 @@ public class PrefUtils {
             try {
                 uploadServers = PrefUtils.getUploadServers(context);
                 UploadServer uploadServer = uploadServers.get(serverId);
-                return uploadServer.getEnabled();
+                return uploadServer.isEnabled();
             } catch (Exception e) {
                 Log.w(TAG, "Error getting info on server!");
             }

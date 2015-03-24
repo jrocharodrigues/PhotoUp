@@ -26,7 +26,7 @@ public class UploadServer {
         this.parameters = parameters;
     }
 
-    public Boolean getEnabled() { return enabled; }
+    public Boolean isEnabled() { return enabled; }
 
     public void setEnabled(Boolean enabled) { this.enabled = enabled; }
 

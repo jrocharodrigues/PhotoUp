@@ -41,7 +41,7 @@ public class MainActivity extends ActionBarActivity implements ViewPagerTabGridV
     private ViewPager mPager;
     private NavigationAdapter mPagerAdapter;
     private ProgressDialog mUploadProgressDialog;
-    private ArrayList<UploadServer> mUploadServers = new ArrayList<>();
+    private ArrayList<UploadServer> mUploadServers = new ArrayList<UploadServer>();
     private int mTotalPhotosToUpload = 0;
 
     private static String sIntentAction;
@@ -195,7 +195,8 @@ public class MainActivity extends ActionBarActivity implements ViewPagerTabGridV
         mUploadProgressDialog.dismiss();
     }
 
-    private void showNoServerFoundDialog(final Context context){
+    @Override
+    public void showNoServerFoundDialog(final Context context){
         new MaterialDialog.Builder(this)
                 .title(R.string.no_server_configured)
                 .content(R.string.add_new_server)

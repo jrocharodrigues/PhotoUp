@@ -7,7 +7,7 @@ Great for parties, friends gather and all the even types!
 * Make the notification icon perceptible
 * refine the handling of the upload progress
 * Obfuscate QR info
-* use info from sp to make the uploads
+* use info from sp to make the uploads (half done, only missing headers and extra parameters)
 * Add upload history tab (SQLite)
 * implement pin ??
 * implement about and share with friends??

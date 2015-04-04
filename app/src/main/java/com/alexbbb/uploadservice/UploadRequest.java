@@ -22,8 +22,8 @@ public class UploadRequest {
     private final String uploadId;
     private final String url;
     private final ArrayList<FileToUpload> filesToUpload;
-    private final ArrayList<NameValue> headers;
-    private final ArrayList<NameValue> parameters;
+    private ArrayList<NameValue> headers;
+    private ArrayList<NameValue> parameters;
 
     /**
      * Creates a new upload request.
@@ -42,6 +42,8 @@ public class UploadRequest {
         headers = new ArrayList<NameValue>();
         parameters = new ArrayList<NameValue>();
     }
+
+
 
     /**
      * Sets custom notification configuration.
@@ -97,6 +99,15 @@ public class UploadRequest {
     }
 
     /**
+     * Sets the headers to this upload request.
+     *
+     * @param headers ArrayList<NameValue> with the headers
+     */
+    public void setHeaders(ArrayList<NameValue> headers) {
+        this.headers = headers;
+    }
+
+    /**
      * Adds a header to this upload request.
      * 
      * @param headerName header name
@@ -104,6 +115,15 @@ public class UploadRequest {
      */
     public void addHeader(final String headerName, final String headerValue) {
         headers.add(new NameValue(headerName, headerValue));
+    }
+
+    /**
+     * Sets the parameters to this upload request.
+     *
+     * @param parameters ArrayList<NameValue> with the parameters
+     */
+    public void setParameters(ArrayList<NameValue> parameters) {
+        this.parameters = parameters;
     }
 
     /**

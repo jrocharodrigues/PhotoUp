@@ -9,11 +9,13 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.alexbbb.uploadservice.ContentType;
 import com.alexbbb.uploadservice.UploadRequest;
 import com.alexbbb.uploadservice.UploadService;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -38,7 +40,8 @@ public class MediaScannerBroadcastReceiver extends BroadcastReceiver {
         Log.d(TAG, "Received: " + intent.getAction());
         /*if (intent.getAction().equals(android.net.ConnectivityManager.CONNECTIVITY_ACTION)) {
             handleConnectivityAction(context, intent);
-        }else*/ if (intent.getAction().equals(NEW_PHOTO_ACTION_UNOFFICIAL)) {
+        }else*/
+        if (intent.getAction().equals(NEW_PHOTO_ACTION_UNOFFICIAL)) {
             handleNewPictureAction(context, intent);
             Log.d(TAG, "UNOFFICIAL processed: com.android.camera.NEW_PICTURE");
         } else if (intent.getAction().equals(NEW_PHOTO_ACTION)) {
@@ -83,28 +86,44 @@ public class MediaScannerBroadcastReceiver extends BroadcastReceiver {
 
     }
 
-    private void doUpload(Context context, GalleryItem itemToUpload){
-        final String serverUrlString = Utils.serverURL;
-        final String paramNameString = Utils.parameterName;
+    private void doUpload(Context context, GalleryItem itemToUpload) {
 
         if (itemToUpload.getPath() == null)
             return;
 
-        final UploadRequest request = new UploadRequest(context, UUID.randomUUID().toString(), serverUrlString);
+        ArrayList<UploadServer> mUploadServers = PrefUtils.getUploadServers(context);
 
-        request.setNotificationConfig(R.drawable.ic_launcher, context.getString(R.string.app_name),
-                context.getString(R.string.uploading), context.getString(R.string.upload_success),
-                context.getString(R.string.upload_error), false);
+        if (mUploadServers.size() > 0) {
 
-        request.addFileToUpload(itemToUpload.getPath(), paramNameString, itemToUpload.getFileName(false), ContentType.APPLICATION_OCTET_STREAM);
+            for (UploadServer uploadServer : mUploadServers) {
+                if (uploadServer.isEnabled()) {//maybe implement getEnabledServers
+                    final UploadRequest request = new UploadRequest(context, UUID.randomUUID().toString(), uploadServer.getURL());
+                    request.setMethod(uploadServer.getMethod());
+                    request.setHeaders(uploadServer.getHeaders());
+                    request.setParameters(uploadServer.getParameters());
 
-        try {
-            UploadService.startUpload(request);
-        } catch (Exception exc) {
-            Log.w(TAG, "Malformed upload request. " + exc.getLocalizedMessage());
+                    request.setNotificationConfig(R.drawable.ic_launcher, context.getString(R.string.app_name),
+                            context.getString(R.string.uploading) + " to " + uploadServer.getURL(),
+                            context.getString(R.string.upload_success),
+                            context.getString(R.string.upload_error), false);
 
+                    request.addFileToUpload(itemToUpload.getPath(), uploadServer.getFileParameterName(), itemToUpload.getFileName(false), ContentType.APPLICATION_OCTET_STREAM);
+
+                    try {
+                        UploadService.startUpload(request);
+                        Log.d(TAG, uploadServer.getURL() + "-" + uploadServer.getFileParameterName());
+                    } catch (Exception exc) {
+
+                        Log.d(TAG, "Malformed upload request. " + exc.getLocalizedMessage());
+
+                    }
+                }
+            }
+        } else {
+            Log.d(TAG, "No server found. ");
         }
     }
+
 
     public static boolean isOnline(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

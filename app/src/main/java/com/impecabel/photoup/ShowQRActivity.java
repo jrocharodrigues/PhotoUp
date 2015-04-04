@@ -4,31 +4,28 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
-
-import com.squareup.picasso.Picasso;
-
-import java.io.File;
 
 /**
  * Created by jrodrigues on 12/02/15.
  */
 public class ShowQRActivity extends ActionBarActivity {
 
+    private static final String TAG = "QRCodeAct";
     private ImageView qrImageView;
     private ShareActionProvider mShareActionProvider;
     private Bitmap mQRBitmap;
     private String mServerName = "Server";
     private boolean keepImage = false;
-    private String mLocalFilePath;
+    private Uri mLocalFileUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,27 +46,19 @@ public class ShowQRActivity extends ActionBarActivity {
             qrImageView.setImageBitmap(mQRBitmap);
         }
 
-       // Uri serverQRUri = QRCodeHelper.getLocalBitmapUri(this, mQRBitmap);
+        // Uri serverQRUri = QRCodeHelper.getLocalBitmapUri(this, mQRBitmap);
         keepImage = false;
-        mLocalFilePath = QRCodeHelper.saveFile(this, mQRBitmap, mServerName);
-        if (mLocalFilePath != null && mLocalFilePath != "") {
-            Intent shareIntent = new Intent();
-            Uri serverQRUri = Uri.parse(mLocalFilePath);
-
-            shareIntent.setAction(Intent.ACTION_SEND);
-            shareIntent.putExtra(Intent.EXTRA_STREAM, serverQRUri);
-            shareIntent.setType("image/*");
-            setShareIntent(shareIntent);
-        }
+        mLocalFileUri = QRCodeHelper.saveFile(this, mQRBitmap, mServerName);
 
 
     }
 
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (!keepImage){
-            QRCodeHelper.deleteFile(mLocalFilePath);
+        if (!keepImage) {
+            QRCodeHelper.deleteFile(this, mLocalFileUri);
         }
     }
 
@@ -80,8 +69,8 @@ public class ShowQRActivity extends ActionBarActivity {
 
         // Set up ShareActionProvider's default share intent
         MenuItem shareItem = menu.findItem(R.id.menu_item_share);
-        mShareActionProvider = (ShareActionProvider)
-                MenuItemCompat.getActionProvider(shareItem);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+
         mShareActionProvider.setShareIntent(getDefaultIntent());
 
 
@@ -89,12 +78,18 @@ public class ShowQRActivity extends ActionBarActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        createItent();
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.menu_item_save){
+        if (id == R.id.menu_item_save) {
             keepImage = true;
-            QRCodeHelper.galleryAddPic(this, mLocalFilePath);
+            QRCodeHelper.refreshGallery(this, mLocalFileUri);
             Toast.makeText(this, getText(R.string.qr_saved), Toast.LENGTH_SHORT).show();
         }
 
@@ -108,7 +103,8 @@ public class ShowQRActivity extends ActionBarActivity {
         }
     }
 
-    /** Defines a default (dummy) share intent to initialize the action provider.
+    /**
+     * Defines a default (dummy) share intent to initialize the action provider.
      * However, as soon as the actual content to be used in the intent
      * is known or changes, you must update the share intent by again calling
      * mShareActionProvider.setShareIntent()
@@ -119,5 +115,16 @@ public class ShowQRActivity extends ActionBarActivity {
         return intent;
     }
 
+
+    private void createItent() {
+        if (mLocalFileUri != null) {
+            Intent shareIntent = new Intent();
+            Log.d(TAG, mLocalFileUri.toString());
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, mLocalFileUri);
+            shareIntent.setType("image/*");
+            setShareIntent(shareIntent);
+        }
+    }
 
 }

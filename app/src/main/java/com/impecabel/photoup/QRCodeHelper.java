@@ -74,15 +74,16 @@ public class QRCodeHelper {
         return bmp;
     }
 
-    public static Boolean deleteFile(String filePath){
-        File fDelete = new File(filePath);
+    public static Boolean deleteFile(Context context, Uri fileUri){
+        File fDelete = new File(fileUri.toString());
         boolean success = false;
         if (fDelete.exists()) {
             if (fDelete.delete()) {
-                Log.d(TAG, "file Deleted :" + filePath);
+                Log.d(TAG, "file Deleted :" + fileUri);
+                refreshGallery(context, fileUri);
                 success = true;
             } else {
-                Log.d(TAG, "file not Deleted :" + filePath);
+                Log.d(TAG, "file not Deleted :" + fileUri);
                 success = false;
             }
         }
@@ -92,10 +93,10 @@ public class QRCodeHelper {
     }
 
 
-    public static String saveFile (Context context, Bitmap bitmap, String fileName){
+    public static Uri saveFile (Context context, Bitmap bitmap, String fileName){
 
         boolean success = false;
-        String mFilePath = null;
+        Uri mFileUri = null;
 
         if (isExternalStorageWritable()) {
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -113,8 +114,8 @@ public class QRCodeHelper {
 
                 out = new FileOutputStream(file);
                 success = bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-                mFilePath = file.getAbsolutePath();
-                Log.d(TAG, mFilePath);
+                mFileUri = Uri.fromFile(file);
+                Log.d(TAG, mFileUri.toString());
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -128,7 +129,7 @@ public class QRCodeHelper {
         }
         Log.d(TAG, Boolean.toString(success));
 
-        return mFilePath;
+        return mFileUri;
 
     }
 
@@ -143,11 +144,9 @@ public class QRCodeHelper {
     }
 
 
-    public static void galleryAddPic(Context context, String path) {
+    public static void refreshGallery(Context context, Uri fileUri) {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(path);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
+        mediaScanIntent.setData(fileUri);
         context.sendBroadcast(mediaScanIntent);
     }
 }

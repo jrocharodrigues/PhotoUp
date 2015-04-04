@@ -189,6 +189,8 @@ public class ViewPagerTabGridViewFragment extends Fragment implements View.OnCli
                 if (uploadServer.isEnabled()) {//maybe implement getEnabledServers
                     UploadRequest request = new UploadRequest(mContext, UUID.randomUUID().toString(), uploadServer.getURL());
                     request.setMethod(uploadServer.getMethod());
+                    request.setHeaders(uploadServer.getHeaders());
+                    request.setParameters(uploadServer.getParameters());
 
                     for (GalleryItem itemToUpload : mGalleryItems) {
                         request.addFileToUpload(itemToUpload.getPath(), uploadServer.getFileParameterName(),
@@ -235,7 +237,7 @@ public class ViewPagerTabGridViewFragment extends Fragment implements View.OnCli
 
         if (Intent.ACTION_SEND.equals(intentAction)){
               Uri imageUri = args.getParcelable(Intent.EXTRA_STREAM);
-
+              Log.d(TAG, imageUri.toString());
               if (imageUri != null) {
                   String imagePath = FileUtils.getPath(mContext, imageUri);
                   Toast.makeText(mContext, imagePath, Toast.LENGTH_SHORT).show();
